@@ -9,9 +9,10 @@ interface QuestionCardProps {
   options: string[]
   contextText?: string
   onSubmit: (selectedIndex: number) => void
+  disabled?: boolean
 }
 
-export function QuestionCard({ question, options, contextText, onSubmit }: QuestionCardProps) {
+export function QuestionCard({ question, options, contextText, onSubmit, disabled = false }: QuestionCardProps) {
   const [selected, setSelected] = React.useState<number | null>(null)
 
   return (
@@ -53,7 +54,7 @@ export function QuestionCard({ question, options, contextText, onSubmit }: Quest
       <div className="flex justify-end">
         <Button 
           onClick={() => selected !== null && onSubmit(selected)}
-          disabled={selected === null}
+          disabled={selected === null || disabled}
           className="px-8 shadow-sm"
         >
           Submit Answer
