@@ -1,0 +1,33 @@
+# ============================================
+# ROOT-LEVEL GITIGNORE — COGNIVEX
+# ============================================
+
+# Environment variables (NEVER commit these)
+.env
+.env.local
+.env.*
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+/out/
+/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files (keep .idea out of repo)
+.idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
