@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+export { BASE_URL };
 
 export async function submitOnboarding(data: { 
   goal: string, 
@@ -10,7 +12,7 @@ export async function submitOnboarding(data: {
   target_timeline_months?: number,
   placement_target?: string
 }) {
-  const response = await fetch(`${API_URL}/onboarding`, {
+  const response = await fetch(`${BASE_URL}/onboarding`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,7 +28,7 @@ export async function submitOnboarding(data: {
 }
 
 export async function getDashboard() {
-  const response = await fetch(`${API_URL}/dashboard`, {
+  const response = await fetch(`${BASE_URL}/dashboard`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -42,7 +44,7 @@ export async function getDashboard() {
 }
 
 export async function askAI(query: string) {
-  const response = await fetch(`${API_URL}/ai-tutor`, {
+  const response = await fetch(`${BASE_URL}/ai-tutor`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -63,7 +65,7 @@ export async function askAI(query: string) {
 }
 
 export async function getDailyFocus() {
-  const response = await fetch(`${API_URL}/daily/today-focus`, {
+  const response = await fetch(`${BASE_URL}/daily/today-focus`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -79,7 +81,7 @@ export async function getDailyFocus() {
 }
 
 export async function completeDailyTask(taskText: string) {
-  const response = await fetch(`${API_URL}/daily/complete-task`, {
+  const response = await fetch(`${BASE_URL}/daily/complete-task`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -95,7 +97,7 @@ export async function completeDailyTask(taskText: string) {
 }
 
 export async function getTopicProgress() {
-  const response = await fetch(`${API_URL}/progress/topics`, {
+  const response = await fetch(`${BASE_URL}/progress/topics`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -109,7 +111,7 @@ export async function getTopicProgress() {
 }
 
 export async function saveTopicProgress(subject: string, topic: string, completed: boolean) {
-  const response = await fetch(`${API_URL}/progress/topics`, {
+  const response = await fetch(`${BASE_URL}/progress/topics`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -123,7 +125,7 @@ export async function saveTopicProgress(subject: string, topic: string, complete
 }
 
 export async function getRoadmapProgress() {
-  const response = await fetch(`${API_URL}/progress/roadmap`, {
+  const response = await fetch(`${BASE_URL}/progress/roadmap`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -137,7 +139,7 @@ export async function getRoadmapProgress() {
 }
 
 export async function saveRoadmapProgress(phase: string, item: string, completed: boolean) {
-  const response = await fetch(`${API_URL}/progress/roadmap`, {
+  const response = await fetch(`${BASE_URL}/progress/roadmap`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

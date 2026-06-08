@@ -7,6 +7,7 @@ import { Timer } from "@/components/practice/Timer"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { PdfUploader } from "@/components/ui/PdfUploader"
 import { Button } from "@/components/ui/Button"
+import { BASE_URL } from "@/lib/api"
 import { BrainCircuit, Loader2 } from "lucide-react"
 
 export default function PracticePage() {
@@ -59,7 +60,7 @@ export default function PracticePage() {
   const finishTest = async (finalAnswers: number[]) => {
     setIsSubmitting(true)
     try {
-      const response = await fetch('http://localhost:5000/practice/submit-test', {
+      const response = await fetch(`${BASE_URL}/practice/submit-test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
