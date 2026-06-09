@@ -1,6 +1,7 @@
 "use client"
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { ChatBox } from "@/components/ai/ChatBox"
 import { useSearchParams } from "next/navigation"
 import * as React from "react"
@@ -20,10 +21,12 @@ function AiMentorContent() {
 
 export default function AiMentorPage() {
   return (
-    <DashboardLayout title="AI Mentor">
-      <React.Suspense fallback={<div className="flex items-center justify-center h-full text-foreground/50">Loading AI Mentor...</div>}>
-        <AiMentorContent />
-      </React.Suspense>
-    </DashboardLayout>
+    <ProtectedRoute>
+      <DashboardLayout title="AI Mentor">
+        <React.Suspense fallback={<div className="flex items-center justify-center h-full text-foreground/50">Loading AI Mentor...</div>}>
+          <AiMentorContent />
+        </React.Suspense>
+      </DashboardLayout>
+    </ProtectedRoute>
   )
 }

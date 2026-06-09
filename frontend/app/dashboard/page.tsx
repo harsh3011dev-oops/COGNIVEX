@@ -9,10 +9,19 @@ import { ProgressChart } from "@/components/dashboard/ProgressChart"
 import Link from "next/link"
 import { Play, MessageCircle, Map, BookOpen, Flame, Check, Sparkles, BookOpenCheck } from "lucide-react"
 import { getDashboard, getTopicProgress, getRoadmapProgress } from "@/lib/api"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 
 export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+}
+
+function DashboardContent() {
   const [dashboardData, setDashboardData] = React.useState<any>(null);
   const [topicProgress, setTopicProgress] = React.useState<any[]>([]);
   const [roadmapProgress, setRoadmapProgress] = React.useState<any[]>([]);

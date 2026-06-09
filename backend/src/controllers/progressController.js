@@ -1,16 +1,10 @@
 const db = require('../config/db');
 
-// GET /progress/topics
 const getTopicProgress = async (req, res) => {
     try {
-        let userId = req.headers['user-id'];
-        if (!userId && db) {
-            // Fallback for prototype: get latest user profile
-            const { data } = await db.from('user_profile').select('id').order('created_at', { ascending: false }).limit(1);
-            if (data && data.length > 0) userId = data[0].id;
-        }
+        const userId = req.user.uid;
 
-        if (!userId || !db) {
+        if (!db) {
             return res.status(200).json([]);
         }
 
@@ -31,18 +25,12 @@ const getTopicProgress = async (req, res) => {
     }
 };
 
-// POST /progress/topics
 const updateTopicProgress = async (req, res) => {
     try {
+        const userId = req.user.uid;
         const { subject, topic, completed } = req.body;
-        let userId = req.headers['user-id'];
-        
-        if (!userId && db) {
-            const { data } = await db.from('user_profile').select('id').order('created_at', { ascending: false }).limit(1);
-            if (data && data.length > 0) userId = data[0].id;
-        }
 
-        if (!userId || !db) {
+        if (!db) {
             return res.status(200).json({ success: true, message: "Mock success - DB not connected" });
         }
 
@@ -66,16 +54,11 @@ const updateTopicProgress = async (req, res) => {
     }
 };
 
-// GET /progress/roadmap
 const getRoadmapProgress = async (req, res) => {
     try {
-        let userId = req.headers['user-id'];
-        if (!userId && db) {
-            const { data } = await db.from('user_profile').select('id').order('created_at', { ascending: false }).limit(1);
-            if (data && data.length > 0) userId = data[0].id;
-        }
+        const userId = req.user.uid;
 
-        if (!userId || !db) {
+        if (!db) {
             return res.status(200).json([]);
         }
 
@@ -96,18 +79,12 @@ const getRoadmapProgress = async (req, res) => {
     }
 };
 
-// POST /progress/roadmap
 const updateRoadmapProgress = async (req, res) => {
     try {
+        const userId = req.user.uid;
         const { phase, item, completed } = req.body;
-        let userId = req.headers['user-id'];
-        
-        if (!userId && db) {
-            const { data } = await db.from('user_profile').select('id').order('created_at', { ascending: false }).limit(1);
-            if (data && data.length > 0) userId = data[0].id;
-        }
 
-        if (!userId || !db) {
+        if (!db) {
             return res.status(200).json({ success: true, message: "Mock success - DB not connected" });
         }
 

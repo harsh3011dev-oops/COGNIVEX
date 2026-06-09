@@ -2,6 +2,8 @@ const db = require('../config/db');
 
 const getDashboardData = async (req, res) => {
     try {
+        const userId = req.user.uid;
+
         // Mock fallback data
         let userData = {
             score: 72,
@@ -22,17 +24,16 @@ const getDashboardData = async (req, res) => {
         };
         
         if (db) {
-            // Fetch latest user profile
             const { data, error } = await db
                 .from('user_profile')
                 .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1);
+                .eq('id', userId)
+                .maybeSingle();
                 
             if (error) {
                 console.error("Supabase fetch error:", error);
-            } else if (data && data.length > 0) {
-                const profile = data[0];
+            } else if (data) {
+                const profile = data;
                 
                 userData = {
                     score: profile.cognitive_score || 50,
@@ -52,12 +53,11 @@ const getDashboardData = async (req, res) => {
                     next_recommended_subject: "Data Structures & Algorithms"
                 };
 
-                // Fetch topic completion stats
                 try {
                     const { data: topics, error: topicsError } = await db
                         .from('topic_progress')
                         .select('subject, completed')
-                        .eq('user_id', profile.id);
+                        .eq('user_id', userId);
 
                     if (!topicsError && topics && topics.length > 0) {
                         const completedCount = topics.filter(t => t.completed).length;
@@ -85,12 +85,11 @@ const getDashboardData = async (req, res) => {
                     console.error("Error calculating topic progress:", err);
                 }
 
-                // Fetch roadmap progress stats
                 try {
                     const { data: roadmap, error: roadmapError } = await db
                         .from('roadmap_progress')
                         .select('completed')
-                        .eq('user_id', profile.id);
+                        .eq('user_id', userId);
 
                     if (!roadmapError && roadmap && roadmap.length > 0) {
                         const completedCount = roadmap.filter(r => r.completed).length;

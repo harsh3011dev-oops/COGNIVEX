@@ -2,38 +2,39 @@ const db = require('../config/db');
 
 const submitOnboarding = async (req, res) => {
     try {
+        const userId = req.user.uid;
         const { goal, days_left, domain, level, confidence, semester, target_timeline_months, placement_target } = req.body;
         
         if (!goal || !domain || !level || !confidence) {
             return res.status(400).json({ error: 'Goal, domain, level, and confidence are required' });
         }
 
-        // Generate cognitive metrics
         let baseScore = 50;
         let p_level = level.toLowerCase();
         
         if (p_level === 'beginner') {
-            baseScore = Math.floor(Math.random() * (50 - 40 + 1)) + 40; // 40-50
+            baseScore = Math.floor(Math.random() * (50 - 40 + 1)) + 40;
         } else if (p_level === 'intermediate') {
-            baseScore = Math.floor(Math.random() * (70 - 55 + 1)) + 55; // 55-70
+            baseScore = Math.floor(Math.random() * (70 - 55 + 1)) + 55;
         } else if (p_level === 'advanced') {
-            baseScore = Math.floor(Math.random() * (85 - 70 + 1)) + 70; // 70-85
+            baseScore = Math.floor(Math.random() * (85 - 70 + 1)) + 70;
         }
 
         const numericConfidence = parseInt(confidence) || 50;
 
         const generatedData = {
             cognitive_score: baseScore,
-            speed: Math.floor(baseScore * 0.9), // rough derivative
-            accuracy: Math.floor(baseScore * 0.95), // rough derivative
+            speed: Math.floor(baseScore * 0.9),
+            accuracy: Math.floor(baseScore * 0.95),
             confidence: numericConfidence
         };
 
         if (db) {
-            const { data, error } = await db
+            const { error } = await db
                 .from('user_profile')
-                .insert([
+                .upsert(
                     {
+                        id: userId,
                         goal,
                         days_left: parseInt(days_left) || (parseInt(target_timeline_months) * 30) || 180,
                         domain,
@@ -44,13 +45,14 @@ const submitOnboarding = async (req, res) => {
                         placement_target: placement_target || 'Not decided',
                         cognitive_score: generatedData.cognitive_score,
                         speed: generatedData.speed,
-                        accuracy: generatedData.accuracy
-                    }
-                ])
-                .select();
+                        accuracy: generatedData.accuracy,
+                        updated_at: new Date()
+                    },
+                    { onConflict: 'id' }
+                );
                 
             if (error) {
-                console.error("Supabase insert error:", error.message || error);
+                console.error("Supabase upsert error:", error.message || error);
                 console.warn("Continuing despite DB error for prototyping purposes...");
             }
         } else {

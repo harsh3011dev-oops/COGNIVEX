@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { Card, CardContent } from "@/components/ui/Card"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { getTopicProgress } from "@/lib/api"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 import Link from "next/link"
 import { Code, Cpu, Database, Network, Box, Layers, ArrowRight, BookOpen } from "lucide-react"
 
@@ -55,6 +56,14 @@ const subjects = [
 ];
 
 export default function ExamPrepPage() {
+  return (
+    <ProtectedRoute>
+      <ExamPrepContent />
+    </ProtectedRoute>
+  );
+}
+
+function ExamPrepContent() {
   const [topicProgress, setTopicProgress] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 

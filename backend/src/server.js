@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+const authMiddleware = require('./middleware/authMiddleware');
+const authRoutes = require('./routes/authRoutes');
 const onboardingRoutes = require('./routes/onboardingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const practiceRoutes = require('./routes/practiceRoutes');
@@ -28,6 +30,9 @@ app.get('/', (req, res) => {
 });
 
 // Routes
+app.use('/auth', authRoutes);
+
+app.use(authMiddleware);
 app.use('/onboarding', onboardingRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/practice', practiceRoutes);

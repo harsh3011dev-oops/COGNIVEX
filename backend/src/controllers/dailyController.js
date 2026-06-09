@@ -3,20 +3,9 @@ const dailyService = require('../services/daily.service');
 
 const getTodayFocus = async (req, res) => {
     try {
-        let userId = req.headers['user-id']; // Optional header for multi-user
+        const userId = req.user.uid;
 
-        if (!userId && db) {
-            // Fallback: Get most recent user for prototype
-            const { data } = await db
-                .from('user_profile')
-                .select('id')
-                .order('created_at', { ascending: false })
-                .limit(1);
-            
-            if (data && data.length > 0) userId = data[0].id;
-        }
-
-        if (!userId) {
+        if (!db) {
             return res.status(200).json({ 
                 tasks: ["Complete onboarding", "Explore dashboard"], 
                 completed_tasks: [],
@@ -26,7 +15,6 @@ const getTodayFocus = async (req, res) => {
 
         const dailyData = await dailyService.getOrGenerateDailyTasks(userId);
         
-        // Fetch streak for UI
         const { data: profile } = await db
             .from('user_profile')
             .select('daily_streak')
@@ -46,25 +34,15 @@ const getTodayFocus = async (req, res) => {
 
 const completeTask = async (req, res) => {
     try {
+        const userId = req.user.uid;
         const { taskText } = req.body;
-        let userId = req.headers['user-id'];
 
         if (!taskText) return res.status(400).json({ error: "Task text is required" });
 
-        if (!userId && db) {
-            const { data } = await db
-                .from('user_profile')
-                .select('id')
-                .order('created_at', { ascending: false })
-                .limit(1);
-            if (data && data.length > 0) userId = data[0].id;
-        }
-
-        if (!userId) return res.status(400).json({ error: "User not found" });
+        if (!db) return res.status(400).json({ error: "Database not connected" });
 
         const result = await dailyService.markTaskComplete(userId, taskText);
         
-        // Return updated stats
         const { data: profile } = await db
             .from('user_profile')
             .select('daily_streak')

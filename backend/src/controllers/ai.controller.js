@@ -2,34 +2,31 @@ const db = require('../config/db');
 const { generateMentorResponse } = require('../services/ai.service');
 const dailyService = require('../services/daily.service');
 
-/**
- * POST /ai-tutor
- * Accepts a user query, fetches their profile, and returns a personalized AI mentor response.
- */
 const askAITutor = async (req, res) => {
     try {
+        const userId = req.user.uid;
         const { query } = req.body;
 
         if (!query || !query.trim()) {
             return res.status(400).json({ error: 'Query is required.' });
         }
 
-        // Fetch latest user profile from Supabase
         let userProfile = null;
 
         if (db) {
             const { data, error } = await db
                 .from('user_profile')
                 .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1);
+                .eq('id', userId)
+                .maybeSingle();
 
-            if (data && data.length > 0) {
-                userProfile = data[0];
+            if (error) {
+                console.error('Supabase fetch error:', error);
+            } else if (data) {
+                userProfile = data;
                 
-                // Fetch daily tasks to align AI
                 try {
-                    const dailyData = await dailyService.getOrGenerateDailyTasks(userProfile.id);
+                    const dailyData = await dailyService.getOrGenerateDailyTasks(userId);
                     userProfile.today_focus = dailyData.tasks || [];
                 } catch (err) {
                     console.error("Failed to fetch daily tasks for AI context:", err);
@@ -37,7 +34,6 @@ const askAITutor = async (req, res) => {
             }
         }
 
-        // Generate AI response
         const aiResponse = await generateMentorResponse(query, userProfile);
 
         return res.status(200).json({

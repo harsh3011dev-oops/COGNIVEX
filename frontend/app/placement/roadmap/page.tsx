@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { Card, CardContent } from "@/components/ui/Card"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { getRoadmapProgress, saveRoadmapProgress } from "@/lib/api"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { Check, Flame, Map, BookOpen, Compass, Shield } from "lucide-react"
 
 const roadmapPhases = [
@@ -40,6 +41,14 @@ const roadmapPhases = [
 ];
 
 export default function PlacementRoadmapPage() {
+  return (
+    <ProtectedRoute>
+      <PlacementRoadmapContent />
+    </ProtectedRoute>
+  );
+}
+
+function PlacementRoadmapContent() {
   const [completedItems, setCompletedItems] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 

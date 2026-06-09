@@ -7,10 +7,20 @@ import { Timer } from "@/components/practice/Timer"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { PdfUploader } from "@/components/ui/PdfUploader"
 import { Button } from "@/components/ui/Button"
+import { auth } from "@/lib/firebase"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { BASE_URL } from "@/lib/api"
 import { BrainCircuit, Loader2 } from "lucide-react"
 
 export default function PracticePage() {
+  return (
+    <ProtectedRoute>
+      <PracticeContent />
+    </ProtectedRoute>
+  );
+}
+
+function PracticeContent() {
   const [phase, setPhase] = React.useState<"setup" | "generating" | "assessment" | "results">("setup")
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0)
@@ -60,9 +70,13 @@ export default function PracticePage() {
   const finishTest = async (finalAnswers: number[]) => {
     setIsSubmitting(true)
     try {
+      const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
       const response = await fetch(`${BASE_URL}/practice/submit-test`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           answers: finalAnswers,
           correct_answers: questions.map(q => q.correct),

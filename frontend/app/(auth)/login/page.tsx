@@ -5,23 +5,47 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { Compass, BrainCircuit } from "lucide-react"
+import { Compass, BrainCircuit, Loader2 } from "lucide-react"
+import { useAuth } from "@/lib/AuthContext"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login, googleSignIn } = useAuth()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Save name to localStorage so dashboard can greet user
-    const displayName = name.trim() || (email ? email.split("@")[0] : "Scholar")
-    localStorage.setItem("cognivex_user_name", displayName)
-    
-    // Explicit small delay often helps with state persistence before redirect
-    setTimeout(() => {
+    setError("")
+    setLoading(true)
+    try {
+      await login(email, password)
+      const displayName = name.trim() || email.split("@")[0] || "Scholar"
+      localStorage.setItem("cognivex_user_name", displayName)
       router.push("/dashboard")
-    }, 100)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to sign in"
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setError("")
+    setLoading(true)
+    try {
+      await googleSignIn()
+      router.push("/dashboard")
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Google sign in failed"
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -49,7 +73,7 @@ export default function LoginPage() {
             Master your mind.<br/>Shape your future.
           </h2>
           <p className="text-lg text-primary-foreground/80 leading-relaxed mb-12">
-            Cognivex isn't just a learning platform—it's your intellectual engine. We blend cognitive strategy with intelligent guidance to help you master complex subjects faster, build unshakeable confidence, and track true growth.
+            Cognivex isn&apos;t just a learning platform—it&apos;s your intellectual engine. We blend cognitive strategy with intelligent guidance to help you master complex subjects faster, build unshakeable confidence, and track true growth.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
@@ -97,6 +121,12 @@ export default function LoginPage() {
             <p className="text-foreground/60">Enter your credentials to access your dashboard.</p>
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-destructive/10 text-destructive text-sm font-medium">
+              {error}
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground/80 block">Your Name</label>
@@ -127,19 +157,41 @@ export default function LoginPage() {
               <Input 
                 type="password" 
                 placeholder="••••••••" 
-                className="h-14 bg-secondary/20 border border-input/50 focus:border-primary focus:bg-card rounded-xl text-base px-5 shadow-sm transition-all" 
+                className="h-14 bg-secondary/20 border border-input/50 focus:border-primary focus:bg-card rounded-xl text-base px-5 shadow-sm transition-all"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 required
               />
             </div>
             
             <Button 
               type="submit"
+              disabled={loading}
               className="w-full h-14 text-lg font-bold shadow-md shadow-primary/20 hover:shadow-lg mt-8 rounded-xl transition-all duration-300" 
               size="lg"
             >
-              Sign In to Dashboard
+              {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Sign In to Dashboard"}
             </Button>
           </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-input/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-foreground/50 font-semibold tracking-widest">Or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading}
+            onClick={handleGoogleSignIn}
+            className="w-full h-14 text-base font-semibold rounded-xl border-input/50 bg-secondary/20 hover:bg-secondary/30"
+          >
+            Continue with Google
+          </Button>
 
           <div className="mt-10 text-center">
             <span className="text-foreground/60 font-medium">New to Cognivex? </span>

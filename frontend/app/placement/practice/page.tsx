@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { BrainCircuit, Sparkles, Building, Bookmark } from "lucide-react"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 const practiceQuestions = [
   {
@@ -66,6 +67,14 @@ const practiceQuestions = [
 ];
 
 export default function PlacementPracticePage() {
+  return (
+    <ProtectedRoute>
+      <PlacementPracticeContent />
+    </ProtectedRoute>
+  );
+}
+
+function PlacementPracticeContent() {
   const router = useRouter();
 
   const handleSolveWithAI = (q: typeof practiceQuestions[0]) => {
