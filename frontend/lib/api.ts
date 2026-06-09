@@ -1,31 +1,61 @@
+import type { User } from "firebase/auth";
 import { auth } from "./firebase";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export { BASE_URL };
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const user = auth.currentUser;
-  const token = user ? await user.getIdToken() : null;
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+if (typeof window !== "undefined" && !process.env.NEXT_PUBLIC_API_URL) {
+  console.warn("NEXT_PUBLIC_API_URL is not set. API calls will target localhost.");
 }
 
-export async function createUserProfile(data: { name: string; email: string }) {
-  const response = await fetch(`${BASE_URL}/auth/profile`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
+async function getAuthHeaders(user?: User | null): Promise<HeadersInit> {
+  const authUser = user ?? auth.currentUser;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || 'Failed to create user profile');
+  if (!authUser) {
+    return headers;
   }
 
-  return response.json();
+  headers["user-id"] = authUser.uid;
+
+  try {
+    const token = await authUser.getIdToken();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (error) {
+    console.warn("Failed to get Firebase ID token, using user-id fallback:", error);
+  }
+
+  return headers;
+}
+
+export async function createUserProfile(
+  data: { name: string; email: string },
+  user?: User | null
+): Promise<{ isNewUser: boolean }> {
+  const authUser = user ?? auth.currentUser;
+
+  const response = await fetch(`${BASE_URL}/auth/profile`, {
+    method: "POST",
+    headers: await getAuthHeaders(authUser),
+    body: JSON.stringify({
+      ...data,
+      userId: authUser?.uid,
+    }),
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(result.error || "Failed to create user profile");
+  }
+
+  const isNewUser = response.status === 201;
+  return { isNewUser };
 }
 
 export async function submitOnboarding(data: { 

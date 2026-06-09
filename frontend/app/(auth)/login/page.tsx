@@ -7,6 +7,30 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Compass, BrainCircuit, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/AuthContext"
+import { FirebaseError } from "firebase/app"
+
+function getAuthErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof FirebaseError) {
+    switch (err.code) {
+      case "auth/popup-closed-by-user":
+        return "Sign-in was cancelled. Please try again."
+      case "auth/popup-blocked":
+        return "Popup was blocked by your browser. Allow popups for this site and try again."
+      case "auth/cancelled-popup-request":
+        return "Another sign-in popup is already open. Close it and try again."
+      case "auth/unauthorized-domain":
+        return "This site is not authorized for Google sign-in. Add magenta-conkies-315dd7.netlify.app in Firebase Console → Authentication → Settings → Authorized domains."
+      case "auth/network-request-failed":
+        return "Network error. Check your connection and try again."
+      case "auth/operation-not-allowed":
+        return "Google sign-in is not enabled. Enable it in Firebase Console → Authentication → Sign-in method."
+      default:
+        return err.message || fallback
+    }
+  }
+
+  return err instanceof Error ? err.message : fallback
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -27,8 +51,7 @@ export default function LoginPage() {
       localStorage.setItem("cognivex_user_name", displayName)
       router.push("/dashboard")
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to sign in"
-      setError(message)
+      setError(getAuthErrorMessage(err, "Failed to sign in"))
     } finally {
       setLoading(false)
     }
@@ -38,11 +61,10 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
     try {
-      await googleSignIn()
-      router.push("/dashboard")
+      const { isNewUser } = await googleSignIn()
+      router.push(isNewUser ? "/onboarding" : "/dashboard")
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Google sign in failed"
-      setError(message)
+      setError(getAuthErrorMessage(err, "Google sign in failed"))
     } finally {
       setLoading(false)
     }
@@ -190,7 +212,7 @@ export default function LoginPage() {
             onClick={handleGoogleSignIn}
             className="w-full h-14 text-base font-semibold rounded-xl border-input/50 bg-secondary/20 hover:bg-secondary/30"
           >
-            Continue with Google
+            {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Continue with Google"}
           </Button>
 
           <div className="mt-10 text-center">

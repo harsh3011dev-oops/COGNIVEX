@@ -40,8 +40,8 @@ export default function SignupPage() {
     setError("")
     setLoading(true)
     try {
-      await googleSignIn()
-      router.push("/onboarding")
+      const { isNewUser } = await googleSignIn()
+      router.push(isNewUser ? "/onboarding" : "/dashboard")
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Google sign in failed"
       setError(message)

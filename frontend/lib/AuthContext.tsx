@@ -20,7 +20,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  googleSignIn: () => Promise<void>;
+  googleSignIn: () => Promise<{ isNewUser: boolean }>;
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
@@ -46,25 +46,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (name.trim()) {
       await updateProfile(credential.user, { displayName: name.trim() });
     }
-    await createUserProfile({ name: name.trim(), email });
+    await createUserProfile({ name: name.trim(), email }, credential.user);
   };
 
   const logout = async () => {
     await signOut(auth);
   };
 
-  const googleSignIn = async () => {
+  const googleSignIn = async (): Promise<{ isNewUser: boolean }> => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
     const credential = await signInWithPopup(auth, provider);
     const user = credential.user;
-    try {
-      await createUserProfile({
-        name: user.displayName || user.email?.split("@")[0] || "User",
-        email: user.email || "",
-      });
-    } catch {
-      // Profile may already exist for returning users
+    const displayName = user.displayName || user.email?.split("@")[0] || "User";
+
+    localStorage.setItem("cognivex_user_name", displayName);
+
+    const idToken = await user.getIdToken();
+    if (!idToken) {
+      throw new Error("Failed to get authentication token from Google sign-in");
     }
+
+    const { isNewUser } = await createUserProfile(
+      {
+        name: displayName,
+        email: user.email || "",
+      },
+      user
+    );
+
+    return { isNewUser };
   };
 
   const value = React.useMemo(
