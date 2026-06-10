@@ -1,9 +1,16 @@
 const db = require('../config/db');
+const { resolveUserFromRequest } = require('../middleware/authMiddleware');
 
 const createUserProfile = async (req, res) => {
     try {
         const { name, email } = req.body;
-        const uid = req.user.uid;
+        const user = await resolveUserFromRequest(req);
+        const uid = user?.uid;
+
+        if (!uid) {
+            console.warn('Profile creation skipped: no user ID from token or request body');
+            return res.status(200).json({ success: false, message: 'User ID required' });
+        }
 
         if (!db) {
             return res.status(200).json({ success: true, message: 'Mock success - DB not connected' });
@@ -25,19 +32,19 @@ const createUserProfile = async (req, res) => {
                 {
                     id: uid,
                     name: name || null,
-                    email: email || req.user.email || null,
+                    email: email || user.email || null,
                 },
             ]);
 
         if (error) {
             console.error('Supabase profile insert error:', error.message || error);
-            return res.status(500).json({ error: 'Failed to create user profile' });
+            return res.status(200).json({ success: false, message: 'Failed to create user profile' });
         }
 
         return res.status(201).json({ success: true });
     } catch (error) {
         console.error('Create profile error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(200).json({ success: false, message: 'Profile creation could not be completed' });
     }
 };
 

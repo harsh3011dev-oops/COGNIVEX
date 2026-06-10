@@ -36,25 +36,32 @@ function initializeFirebaseAdmin() {
 
 initializeFirebaseAdmin();
 
+async function resolveUserFromRequest(req) {
+    const authHeader = req.headers.authorization;
+
+    if (firebaseInitialized && authHeader?.startsWith('Bearer ')) {
+        try {
+            const token = authHeader.split('Bearer ')[1];
+            const decodedToken = await admin.auth().verifyIdToken(token);
+            return { uid: decodedToken.uid, email: decodedToken.email || null };
+        } catch (error) {
+            console.warn('Firebase token verification failed, trying userId fallback:', error.message || error);
+        }
+    }
+
+    const fallbackUserId = getFallbackUserId(req);
+    if (fallbackUserId) {
+        return { uid: fallbackUserId, email: req.body?.email || null };
+    }
+
+    return null;
+}
+
 const authMiddleware = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-
-        if (firebaseInitialized && authHeader?.startsWith('Bearer ')) {
-            try {
-                const token = authHeader.split('Bearer ')[1];
-                const decodedToken = await admin.auth().verifyIdToken(token);
-
-                req.user = { uid: decodedToken.uid, email: decodedToken.email || null };
-                return next();
-            } catch (error) {
-                console.warn('Firebase token verification failed, trying userId fallback:', error.message || error);
-            }
-        }
-
-        const fallbackUserId = getFallbackUserId(req);
-        if (fallbackUserId) {
-            req.user = { uid: fallbackUserId, email: null };
+        const user = await resolveUserFromRequest(req);
+        if (user) {
+            req.user = user;
             return next();
         }
 
@@ -73,3 +80,4 @@ const authMiddleware = async (req, res, next) => {
 };
 
 module.exports = authMiddleware;
+module.exports.resolveUserFromRequest = resolveUserFromRequest;
