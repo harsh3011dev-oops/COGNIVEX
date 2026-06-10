@@ -102,12 +102,12 @@ function PlacementRoadmapContent() {
 
   return (
     <DashboardLayout title="Placement Roadmap">
-      <div className="mb-8 text-center max-w-2xl mx-auto">
-        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+      <div className="mx-auto mb-6 max-w-2xl text-center sm:mb-8">
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-12 sm:w-12">
           <Map size={24} />
         </div>
-        <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-2">Placement Roadmap</h2>
-        <p className="text-sm text-foreground/50 leading-relaxed">
+        <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Placement Roadmap</h2>
+        <p className="px-2 text-xs leading-relaxed text-foreground/50 sm:px-0 sm:text-sm">
           Follow this structured pathway to transition from academic engineering basics to landing your dream product or service sector offer.
         </p>
       </div>
@@ -120,7 +120,7 @@ function PlacementRoadmapContent() {
         <div className="space-y-8">
           {/* Overall Progress Meter */}
           <Card className="border border-secondary/40 shadow-sm bg-card">
-            <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <CardContent className="flex flex-col items-center justify-between gap-4 p-4 sm:gap-6 sm:p-6 md:flex-row">
               <div className="flex-1 w-full">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-semibold text-foreground">Roadmap Completion</span>
@@ -136,7 +136,7 @@ function PlacementRoadmapContent() {
           </Card>
 
           {/* Visual Checklist Steps */}
-          <div className="relative border-l-2 border-dashed border-secondary/60 ml-4 pl-6 md:pl-10 space-y-12">
+          <div className="relative ml-3 space-y-10 overflow-hidden border-l-2 border-dashed border-secondary/60 pl-8 sm:ml-4 sm:space-y-12 sm:pl-10">
             {roadmapPhases.map((phase, pIdx) => {
               const PhaseIcon = phase.icon;
               return (
@@ -148,12 +148,12 @@ function PlacementRoadmapContent() {
                   className="relative"
                 >
                   {/* Phase Marker Icon */}
-                  <div className={`absolute -left-[54px] md:-left-[62px] top-1 w-12 h-12 rounded-full flex items-center justify-center border-2 border-background shadow-md ${phase.color}`}>
+                  <div className={`absolute -left-[46px] top-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-background shadow-md sm:-left-[54px] sm:h-12 sm:w-12 md:-left-[62px] ${phase.color}`}>
                     <PhaseIcon size={20} />
                   </div>
 
                   <div className="mb-3">
-                    <h3 className="text-xl font-bold text-foreground mb-1">{phase.phase}</h3>
+                    <h3 className="mb-1 text-lg font-bold text-foreground sm:text-xl">{phase.phase}</h3>
                     <p className="text-xs text-foreground/50">{phase.desc}</p>
                   </div>
 
@@ -164,13 +164,13 @@ function PlacementRoadmapContent() {
                         <div
                           key={item}
                           onClick={() => handleToggle(phase.phase, item)}
-                          className={`flex items-center gap-3 p-4 rounded-xl border-none shadow-sm cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                          className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-none p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
                             active 
                               ? 'bg-primary/5 ring-1 ring-primary/20 opacity-90' 
                               : 'bg-card hover:bg-secondary/40 text-foreground'
                           }`}
                         >
-                          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border-2 transition-all ${
+                          <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all ${
                             active 
                               ? 'bg-primary border-primary text-white' 
                               : 'bg-white border-gray-200 text-transparent'

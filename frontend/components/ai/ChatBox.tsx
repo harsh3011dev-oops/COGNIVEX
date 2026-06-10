@@ -10,7 +10,7 @@ export function MessageBubble({ message, isAi }: { message: string, isAi: boolea
       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isAi ? 'bg-primary/20 text-primary' : 'bg-secondary text-secondary-foreground'}`}>
         {isAi ? <Sparkles size={14} /> : <span className="text-xs font-bold">ST</span>}
       </div>
-      <div className={`max-w-[80%] rounded-2xl p-4 text-sm leading-relaxed ${isAi ? 'bg-card text-foreground/90 rounded-tl-none shadow-sm border-none' : 'bg-primary text-primary-foreground rounded-tr-none shadow-sm'}`}>
+      <div className={`max-w-[85%] rounded-2xl p-3 text-sm leading-relaxed sm:max-w-[80%] sm:p-4 ${isAi ? 'bg-card text-foreground/90 rounded-tl-none shadow-sm border-none' : 'bg-primary text-primary-foreground rounded-tr-none shadow-sm'}`}>
         {isAi ? (
           <div className="whitespace-pre-wrap">{message}</div>
         ) : (
@@ -46,7 +46,7 @@ export function PromptChips({ onSelect, disabled }: { onSelect: (text: string) =
           key={prompt}
           onClick={() => onSelect(prompt)}
           disabled={disabled}
-          className="text-xs font-semibold px-4 py-2 rounded-full border-none bg-secondary/30 text-foreground/70 hover:bg-primary/10 hover:text-primary transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+          className="min-h-11 rounded-full border-none bg-secondary/30 px-4 py-2.5 text-xs font-semibold text-foreground/70 transition-all duration-200 hover:bg-primary/10 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
         >
           {prompt}
         </button>
@@ -191,7 +191,7 @@ export function ChatBox({
 
   return (
     <div 
-      className={`flex flex-col h-[calc(100vh-140px)] rounded-3xl border-none overflow-hidden drop-shadow-sm shadow-inner relative transition-colors duration-300 ${isDragging ? 'bg-primary/5 ring-4 ring-primary/20' : 'bg-secondary/10'}`}
+      className={`relative flex h-[calc(100dvh-7.5rem)] min-h-[420px] flex-col overflow-hidden rounded-2xl border-none shadow-inner drop-shadow-sm transition-colors duration-300 sm:h-[calc(100vh-140px)] sm:rounded-3xl ${isDragging ? 'bg-primary/5 ring-4 ring-primary/20' : 'bg-secondary/10'}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -207,13 +207,13 @@ export function ChatBox({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-8 relative">
-        <div className="text-center mb-10 mt-6">
-          <div className="w-16 h-16 bg-card rounded-2xl mx-auto flex items-center justify-center shadow-md mb-4 border border-secondary/50">
-            <span className="text-2xl">🎓</span>
+      <div className="relative flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8">
+        <div className="mb-6 mt-2 text-center sm:mb-10 sm:mt-6">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-secondary/50 bg-card shadow-md sm:mb-4 sm:h-16 sm:w-16">
+            <span className="text-xl sm:text-2xl">🎓</span>
           </div>
-          <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome back, Scholar</h2>
-          <p className="text-sm text-foreground/50 font-medium">I'm here to support your learning journey.</p>
+          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Welcome back, Scholar</h2>
+          <p className="text-xs font-medium text-foreground/50 sm:text-sm">I&apos;m here to support your learning journey.</p>
         </div>
         
         {messages.map((msg, i) => (
@@ -226,7 +226,7 @@ export function ChatBox({
         <div ref={chatEndRef} />
       </div>
       
-      <div className="p-5 bg-card border-t-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] z-10">
+      <div className="z-10 border-t-0 bg-card p-3 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] sm:p-5">
         <PromptChips onSelect={(text) => setInput(text)} disabled={isLoading} />
         
         {attachedFile && (
@@ -252,7 +252,7 @@ export function ChatBox({
           />
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-foreground/50 hover:bg-secondary hover:text-primary transition-colors ml-1"
+            className="ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-secondary hover:text-primary"
             title="Attach PDF"
           >
             <Paperclip size={18} />
@@ -265,13 +265,13 @@ export function ChatBox({
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask me to explain a concept or attach a PDF..."
             disabled={isLoading}
-            className="flex-1 h-10 bg-transparent border-none text-sm text-foreground focus:outline-none px-2 placeholder:text-foreground/40 font-medium disabled:opacity-50"
+            className="h-11 min-w-0 flex-1 border-none bg-transparent px-2 text-sm font-medium text-foreground placeholder:text-foreground/40 focus:outline-none disabled:opacity-50"
           />
           
           <button 
             onClick={handleSend}
             disabled={(!input.trim() && !attachedFile) || isLoading}
-            className="w-10 h-10 rounded-full bg-primary text-primary-foreground shrink-0 flex items-center justify-center hover:bg-primary/90 transition-all disabled:opacity-50 disabled:pointer-events-none"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
           >
             {isLoading ? (
               <Loader2 size={16} className="animate-spin" />

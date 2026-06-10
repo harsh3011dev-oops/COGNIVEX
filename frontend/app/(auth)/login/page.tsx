@@ -127,19 +127,19 @@ export default function LoginPage() {
       </div>
 
       {/* Right Column - Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center relative p-6 sm:p-12">
-        <div className="w-full max-w-md">
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-x-hidden p-4 sm:p-8 md:p-12">
+        <div className="w-full max-w-md min-w-0">
           {/* Mobile brand header (only shown on small screens) */}
-          <div className="lg:hidden text-center mb-10">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl mx-auto mb-6 shadow-sm">
+          <div className="mb-8 text-center lg:hidden sm:mb-10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-bold text-primary shadow-sm sm:mb-6 sm:h-16 sm:w-16 sm:text-3xl">
               C
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Cognivex</h1>
+            <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Cognivex</h1>
             <p className="text-xs text-foreground/50 font-semibold uppercase tracking-widest">Enter your digital sanctuary</p>
           </div>
 
-          <div className="hidden lg:block mb-10">
-            <h2 className="text-3xl font-bold text-foreground mb-2">Welcome back</h2>
+          <div className="mb-8 hidden lg:mb-10 lg:block">
+            <h2 className="mb-2 text-2xl font-bold text-foreground sm:text-3xl">Welcome back</h2>
             <p className="text-foreground/60">Enter your credentials to access your dashboard.</p>
           </div>
 

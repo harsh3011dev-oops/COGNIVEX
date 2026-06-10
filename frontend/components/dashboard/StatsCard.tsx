@@ -17,14 +17,14 @@ export function StatsCard({ data }: StatsCardProps) {
   const confidence = data?.confidence || 92;
 
   return (
-    <Card className="shadow-sm border-none transition-all duration-300 hover:-translate-y-2 hover:shadow-lg cursor-pointer">
-      <CardContent className="p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-1">Learning Intelligence</h3>
-        <p className="text-xs text-foreground/60 mb-6">Your cognitive performance index</p>
+    <Card className="border-none shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-lg">
+      <CardContent className="p-4 sm:p-6">
+        <h3 className="mb-1 text-sm font-semibold text-foreground">Learning Intelligence</h3>
+        <p className="mb-4 text-xs text-foreground/60 sm:mb-6">Your cognitive performance index</p>
         
-        <div className="flex items-end gap-2 mb-8">
-          <span className="text-6xl font-bold text-foreground tracking-tighter">{score}</span>
-          <span className="text-sm font-semibold text-foreground/40 mb-2">/100</span>
+        <div className="mb-6 flex items-end gap-2 sm:mb-8">
+          <span className="text-5xl font-bold tracking-tighter text-foreground sm:text-6xl">{score}</span>
+          <span className="mb-1 text-sm font-semibold text-foreground/40 sm:mb-2">/100</span>
         </div>
         
         <div className="space-y-4">

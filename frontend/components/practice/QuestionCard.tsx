@@ -26,14 +26,14 @@ export function QuestionCard({ question, options, contextText, onSubmit, disable
         </div>
       )}
 
-      <h2 className="text-xl font-bold text-gray-900 mb-8">{question}</h2>
+      <h2 className="mb-6 text-lg font-bold text-gray-900 sm:mb-8 sm:text-xl">{question}</h2>
 
-      <div className="space-y-3 mb-8">
+      <div className="mb-6 space-y-3 sm:mb-8">
         {options.map((option, idx) => (
           <button
             key={idx}
             onClick={() => setSelected(idx)}
-            className={`w-full flex items-start p-4 rounded-xl border text-left transition-all ${
+            className={`flex min-h-11 w-full items-start rounded-xl border p-4 text-left transition-all ${
               selected === idx 
                 ? "border-primary bg-orange-50 shadow-sm" 
                 : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
@@ -51,11 +51,11 @@ export function QuestionCard({ question, options, contextText, onSubmit, disable
         ))}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-stretch sm:justify-end">
         <Button 
           onClick={() => selected !== null && onSubmit(selected)}
           disabled={selected === null || disabled}
-          className="px-8 shadow-sm"
+          className="h-11 w-full px-8 shadow-sm sm:w-auto"
         >
           Submit Answer
         </Button>

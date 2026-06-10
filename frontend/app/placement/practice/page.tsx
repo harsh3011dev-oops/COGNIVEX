@@ -84,17 +84,17 @@ function PlacementPracticeContent() {
 
   return (
     <DashboardLayout title="Placement Practice">
-      <div className="mb-8 text-center max-w-2xl mx-auto">
-        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+      <div className="mx-auto mb-6 max-w-2xl text-center sm:mb-8">
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-12 sm:w-12">
           <BrainCircuit size={24} />
         </div>
-        <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-2">Placement Practice</h2>
-        <p className="text-sm text-foreground/50 leading-relaxed">
+        <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Placement Practice</h2>
+        <p className="px-2 text-xs leading-relaxed text-foreground/50 sm:px-0 sm:text-sm">
           Master high-frequency interview questions curated from placement tests. Click **Solve with AI** to get interactive, guided solutions.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
         {practiceQuestions.map((q, index) => {
           return (
             <motion.div
@@ -104,7 +104,7 @@ function PlacementPracticeContent() {
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <Card className="border border-secondary/40 shadow-sm hover:shadow-md transition-all duration-300 bg-card h-full flex flex-col justify-between">
-                <CardContent className="p-6 flex flex-col justify-between h-full min-h-[260px]">
+                <CardContent className="flex h-full min-h-[240px] flex-col justify-between p-4 sm:min-h-[260px] sm:p-6">
                   <div>
                     <div className="flex justify-between items-start gap-4 mb-3">
                       <span className="text-[10px] font-bold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded">
@@ -115,7 +115,7 @@ function PlacementPracticeContent() {
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+                    <h3 className="mb-2 flex items-start gap-2 text-base font-bold text-foreground sm:text-lg">
                       <Bookmark size={16} className="text-foreground/40" />
                       {q.title}
                     </h3>
@@ -139,7 +139,7 @@ function PlacementPracticeContent() {
 
                     <Button
                       onClick={() => handleSolveWithAI(q)}
-                      className="w-full flex items-center justify-center gap-2 text-xs h-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 shadow-sm"
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-xs text-primary-foreground shadow-sm hover:bg-primary/95"
                     >
                       <Sparkles size={14} />
                       <span>Solve with AI Mentor</span>

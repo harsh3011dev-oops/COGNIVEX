@@ -51,12 +51,12 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-xl border-none overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl -mr-16 -mt-16 opacity-50"></div>
-        <CardContent className="p-8 relative z-10">
-          <div className="text-center mb-10">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Create Account</h1>
+    <div className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background p-4 sm:p-6">
+      <Card className="relative w-full max-w-md overflow-hidden border-none shadow-xl">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-orange-100 opacity-50 blur-3xl"></div>
+        <CardContent className="relative z-10 p-5 sm:p-8">
+          <div className="mb-8 text-center sm:mb-10">
+            <h1 className="mb-1 text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">Create Account</h1>
             <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Begin your journey today</p>
           </div>
 
@@ -72,7 +72,7 @@ export default function SignupPage() {
               <Input
                 type="text"
                 placeholder="John Doe"
-                className="h-12 bg-gray-50/50"
+                className="h-11 bg-gray-50/50 sm:h-12"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required
@@ -83,7 +83,7 @@ export default function SignupPage() {
               <Input
                 type="email"
                 placeholder="scholar@library.edu"
-                className="h-12 bg-gray-50/50"
+                className="h-11 bg-gray-50/50 sm:h-12"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
@@ -94,7 +94,7 @@ export default function SignupPage() {
               <Input
                 type="password"
                 placeholder="••••••••"
-                className="h-12 bg-gray-50/50"
+                className="h-11 bg-gray-50/50 sm:h-12"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -105,7 +105,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 text-base font-semibold shadow-md mt-6 rounded-xl"
+              className="mt-6 h-11 w-full rounded-xl text-base font-semibold shadow-md sm:h-12"
               size="lg"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Sign Up"}
@@ -126,7 +126,7 @@ export default function SignupPage() {
             variant="outline"
             disabled={loading}
             onClick={handleGoogleSignIn}
-            className="w-full h-12 text-base font-semibold rounded-xl"
+            className="h-11 w-full rounded-xl text-base font-semibold sm:h-12"
           >
             Continue with Google
           </Button>

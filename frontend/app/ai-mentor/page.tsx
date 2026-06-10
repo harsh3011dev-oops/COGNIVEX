@@ -13,7 +13,7 @@ function AiMentorContent() {
   const query = searchParams?.get("query") || "";
 
   return (
-    <div className="max-w-4xl mx-auto h-full flex flex-col">
+    <div className="mx-auto flex h-full w-full min-w-0 max-w-4xl flex-col">
       <ChatBox initialTopic={topic} initialSubject={subject} initialQuery={query} />
     </div>
   )
@@ -23,7 +23,7 @@ export default function AiMentorPage() {
   return (
     <ProtectedRoute>
       <DashboardLayout title="AI Mentor">
-        <React.Suspense fallback={<div className="flex items-center justify-center h-full text-foreground/50">Loading AI Mentor...</div>}>
+        <React.Suspense fallback={<div className="flex h-64 items-center justify-center text-sm text-foreground/50 sm:h-full">Loading AI Mentor...</div>}>
           <AiMentorContent />
         </React.Suspense>
       </DashboardLayout>

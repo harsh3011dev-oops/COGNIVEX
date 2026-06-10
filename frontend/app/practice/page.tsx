@@ -115,13 +115,13 @@ function PracticeContent() {
   if (phase === "setup" || phase === "generating") {
     return (
       <DashboardLayout title="Practice Test Setup">
-        <div className="max-w-3xl mx-auto mt-10">
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-6 shadow-sm">
+        <div className="mx-auto mt-4 max-w-3xl sm:mt-10">
+          <div className="mb-8 text-center sm:mb-10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm sm:mb-6 sm:h-16 sm:w-16">
               <BrainCircuit size={32} />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">Generate Practice Assessment</h2>
-            <p className="text-foreground/60 max-w-lg mx-auto">
+            <h2 className="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Generate Practice Assessment</h2>
+            <p className="mx-auto max-w-lg px-2 text-sm text-foreground/60 sm:px-0">
               Upload any PDF study material. Cognivex AI will analyze the text and generate a targeted practice exam.
             </p>
             {mlProfile && (
@@ -131,15 +131,15 @@ function PracticeContent() {
             )}
           </div>
 
-          <div className="bg-card p-8 rounded-3xl shadow-sm border border-secondary/20">
-            <PdfUploader onFileSelect={setSelectedFile} className="mb-8" />
+          <div className="rounded-2xl border border-secondary/20 bg-card p-4 shadow-sm sm:rounded-3xl sm:p-8">
+            <PdfUploader onFileSelect={setSelectedFile} className="mb-6 sm:mb-8" />
             
-            <div className="flex justify-end">
+            <div className="flex justify-stretch sm:justify-end">
               <Button 
                 size="lg" 
                 onClick={handleGenerate} 
                 disabled={!selectedFile || phase === "generating"}
-                className="w-full sm:w-auto min-w-[200px]"
+                className="h-11 w-full min-w-0 sm:min-w-[200px] sm:w-auto"
               >
                 {phase === "generating" ? (
                   <>
@@ -161,10 +161,10 @@ function PracticeContent() {
     if (!testResults) {
       return (
         <DashboardLayout title="Error">
-          <div className="max-w-2xl mx-auto mt-10 p-8 bg-card rounded-3xl shadow-sm text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Submission Failed</h2>
-            <p className="mb-6 opacity-60">Your results couldn't be saved to the database. Please ensure you've run the SQL migration in Supabase.</p>
-            <Button onClick={() => window.location.href = '/dashboard'} className="w-full">
+          <div className="mx-auto mt-4 max-w-2xl rounded-2xl bg-card p-5 text-center shadow-sm sm:mt-10 sm:rounded-3xl sm:p-8">
+            <h2 className="mb-4 text-xl font-bold text-red-600 sm:text-2xl">Submission Failed</h2>
+            <p className="mb-6 text-sm opacity-60 sm:text-base">Your results couldn&apos;t be saved to the database. Please ensure you&apos;ve run the SQL migration in Supabase.</p>
+            <Button onClick={() => window.location.href = '/dashboard'} className="h-11 w-full">
               Back to Dashboard
             </Button>
           </div>
@@ -174,16 +174,16 @@ function PracticeContent() {
 
     return (
       <DashboardLayout title="Test Results">
-        <div className="max-w-2xl mx-auto mt-10 p-8 bg-card rounded-3xl shadow-sm text-center">
-          <h2 className="text-3xl font-bold mb-6">Test Completed!</h2>
-          <div className="grid grid-cols-2 gap-6 mb-8">
-            <div className="p-6 bg-secondary/10 rounded-2xl">
+        <div className="mx-auto mt-4 max-w-2xl rounded-2xl bg-card p-5 text-center shadow-sm sm:mt-10 sm:rounded-3xl sm:p-8">
+          <h2 className="mb-6 text-2xl font-bold sm:text-3xl">Test Completed!</h2>
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+            <div className="rounded-2xl bg-secondary/10 p-5 sm:p-6">
               <div className="text-sm font-medium text-foreground/60">Score</div>
-              <div className="text-4xl font-bold text-primary">{testResults?.score || 0}%</div>
+              <div className="text-3xl font-bold text-primary sm:text-4xl">{testResults?.score || 0}%</div>
             </div>
-            <div className="p-6 bg-secondary/10 rounded-2xl">
+            <div className="rounded-2xl bg-secondary/10 p-5 sm:p-6">
               <div className="text-sm font-medium text-foreground/60">Correct</div>
-              <div className="text-4xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-green-600 sm:text-4xl">
                 {testResults?.correctCount || 0}/{testResults?.total || 0}
               </div>
             </div>
@@ -202,7 +202,7 @@ function PracticeContent() {
             </div>
           )}
 
-          <Button onClick={() => window.location.href = '/dashboard'} className="w-full">
+          <Button onClick={() => window.location.href = '/dashboard'} className="h-11 w-full">
             Back to Dashboard
           </Button>
         </div>
@@ -214,23 +214,25 @@ function PracticeContent() {
     <DashboardLayout title="Practice Assessment">
       {mlProfile && (
         <div className="mb-4 flex justify-center">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-xs font-bold text-primary sm:py-1.5">
             Adaptive Level: {difficultyBadgeLabel(mlProfile.difficulty_level)} 🎯
           </span>
         </div>
       )}
-      <div className="flex justify-between items-center mb-8 bg-card p-5 rounded-2xl border-none drop-shadow-sm shadow-inner">
-        <div className="w-1/2">
-          <div className="flex justify-between text-xs font-bold text-foreground/60 mb-3 uppercase tracking-wider">
-            <span>{selectedFile?.name || "Reasoning & Logic"}</span>
-            <span className="text-primary">Question {currentQuestionIndex + 1} of {questions.length}</span>
+      <div className="mb-6 flex flex-col gap-4 rounded-2xl border-none bg-card p-4 shadow-inner drop-shadow-sm sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="w-full min-w-0 sm:w-1/2">
+          <div className="mb-3 flex flex-col gap-1 text-xs font-bold uppercase tracking-wider text-foreground/60 sm:flex-row sm:justify-between">
+            <span className="truncate">{selectedFile?.name || "Reasoning & Logic"}</span>
+            <span className="shrink-0 text-primary">Question {currentQuestionIndex + 1} of {questions.length}</span>
           </div>
           <ProgressBar value={((currentQuestionIndex + 1) / questions.length) * 100} />
         </div>
-        <Timer initialMinutes={30} />
+        <div className="flex justify-center sm:justify-end">
+          <Timer initialMinutes={30} />
+        </div>
       </div>
 
-      <div className="bg-card p-8 md:p-12 rounded-3xl border-none shadow-sm shadow-secondary/50">
+      <div className="rounded-2xl border-none bg-card p-4 shadow-sm shadow-secondary/50 sm:rounded-3xl sm:p-8 md:p-12">
         <QuestionCard 
           question={questions[currentQuestionIndex].question}
           options={questions[currentQuestionIndex].options}

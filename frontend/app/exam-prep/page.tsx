@@ -92,12 +92,12 @@ function ExamPrepContent() {
 
   return (
     <DashboardLayout title="Semester Exam Prep">
-      <div className="mb-10 text-center max-w-2xl mx-auto">
-        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+      <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-10">
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-12 sm:w-12">
           <BookOpen size={24} />
         </div>
-        <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-2">Semester Exam Prep Hub</h2>
-        <p className="text-sm text-foreground/50 leading-relaxed">
+        <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Semester Exam Prep Hub</h2>
+        <p className="px-2 text-xs leading-relaxed text-foreground/50 sm:px-0 sm:text-sm">
           Master core engineering subjects. Complete all 6 topics per subject to score high in your semester assessments.
         </p>
       </div>
@@ -107,7 +107,7 @@ function ExamPrepContent() {
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {subjects.map((sub, i) => {
             const completion = getSubjectCompletion(sub.name);
             return (
@@ -119,12 +119,12 @@ function ExamPrepContent() {
               >
                 <Link href={`/exam-prep/${sub.slug}`} className="group block h-full">
                   <Card className="h-full border border-secondary/40 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-card overflow-hidden">
-                    <CardContent className="p-6 flex flex-col justify-between h-full min-h-[250px]">
+                    <CardContent className="flex h-full min-h-[220px] flex-col justify-between p-4 sm:min-h-[250px] sm:p-6">
                       <div>
                         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${sub.color} flex items-center justify-center mb-4 border`}>
                           <sub.icon size={22} />
                         </div>
-                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors mb-2">
+                        <h3 className="mb-2 text-base font-bold text-foreground transition-colors group-hover:text-primary sm:text-lg">
                           {sub.name}
                         </h3>
                         <p className="text-xs text-foreground/60 leading-relaxed mb-6">

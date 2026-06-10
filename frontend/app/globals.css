@@ -25,9 +25,15 @@
   * {
     border-color: var(--color-input);
   }
+  html {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    overflow-x: hidden;
+    max-width: 100%;
   }
 }

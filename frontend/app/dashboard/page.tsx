@@ -142,15 +142,15 @@ function DashboardContent() {
   return (
     <DashboardLayout title="Dashboard">
       
-      <div className="mb-8 p-6 bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl text-white shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <span className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 p-4 text-white shadow-md sm:mb-8 sm:rounded-3xl sm:p-6 md:flex-row md:items-center">
+        <div className="min-w-0">
+          <span className="inline-block max-w-full truncate rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider sm:text-xs">
             {dashboardData?.semester} Semester • Goal: {goal}
           </span>
-          <h2 className="text-3xl font-extrabold tracking-tight mt-2 mb-1">Sanctuary of Learning</h2>
-          <p className="text-sm opacity-90">Exactly what you need to master for exams and placement screening.</p>
+          <h2 className="mt-2 mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">Sanctuary of Learning</h2>
+          <p className="text-xs opacity-90 sm:text-sm">Exactly what you need to master for exams and placement screening.</p>
         </div>
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/20">
+        <div className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 backdrop-blur-sm sm:w-auto sm:justify-start">
           <Flame size={20} className="fill-white animate-pulse" />
           <span className="font-bold text-sm">{localStreak} Day Streak</span>
         </div>
@@ -229,13 +229,13 @@ function DashboardContent() {
                   <div 
                     key={task}
                     onClick={() => handleToggleTask(task)}
-                    className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${
+                    className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors ${
                       isDone 
                         ? 'bg-primary/5 opacity-70' 
                         : 'bg-secondary/40 hover:bg-secondary/70'
                     }`}
                   >
-                    <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+                    <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${
                       isDone ? 'bg-primary border-primary text-white' : 'bg-white border-gray-300 text-transparent'
                     }`}>
                       <Check size={10} strokeWidth={3} />
@@ -307,13 +307,13 @@ function DashboardContent() {
           </CardHeader>
           <CardContent className="p-6 pt-2 space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-green-50 dark:bg-green-950/20">
-                <div className="text-[10px] font-bold text-foreground/50 uppercase">Strongest</div>
-                <div className="text-sm font-bold text-foreground">{mlProfile?.strongest_subject || "—"}</div>
+              <div className="rounded-xl bg-green-50 p-3 dark:bg-green-950/20">
+                <div className="text-[10px] font-bold uppercase text-foreground/50">Strongest</div>
+                <div className="break-words text-xs font-bold text-foreground sm:text-sm">{mlProfile?.strongest_subject || "—"}</div>
               </div>
-              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20">
-                <div className="text-[10px] font-bold text-foreground/50 uppercase">Weakest</div>
-                <div className="text-sm font-bold text-foreground">{mlProfile?.weakest_subject || "—"}</div>
+              <div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/20">
+                <div className="text-[10px] font-bold uppercase text-foreground/50">Weakest</div>
+                <div className="break-words text-xs font-bold text-foreground sm:text-sm">{mlProfile?.weakest_subject || "—"}</div>
               </div>
               <div className="p-3 rounded-xl bg-secondary/30">
                 <div className="text-[10px] font-bold text-foreground/50 uppercase">Difficulty</div>
@@ -333,8 +333,8 @@ function DashboardContent() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Link href="/practice" className="flex items-center gap-4 p-5 bg-card rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group border border-secondary/40">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
+        <Link href="/practice" className="group flex min-h-11 items-center gap-4 rounded-2xl border border-secondary/40 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-5">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             <Play size={16} className="ml-0.5" />
           </div>
@@ -344,7 +344,7 @@ function DashboardContent() {
           </div>
         </Link>
         
-        <Link href="/ai-mentor" className="flex items-center gap-4 p-5 bg-card rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group border border-secondary/40">
+        <Link href="/ai-mentor" className="group flex min-h-11 items-center gap-4 rounded-2xl border border-secondary/40 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-5">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             <MessageCircle size={16} />
           </div>
@@ -354,7 +354,7 @@ function DashboardContent() {
           </div>
         </Link>
         
-        <Link href="/placement/practice" className="flex items-center gap-4 p-5 bg-card rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group border border-secondary/40">
+        <Link href="/placement/practice" className="group flex min-h-11 items-center gap-4 rounded-2xl border border-secondary/40 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:col-span-2 sm:p-5 md:col-span-1">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             <Map size={16} />
           </div>
