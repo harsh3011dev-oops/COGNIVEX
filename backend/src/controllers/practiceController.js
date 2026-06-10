@@ -46,6 +46,37 @@ const submitTest = async (req, res) => {
                 testId = testResult[0].id;
             }
 
+            const topicStats = {};
+            answers.forEach((ans, index) => {
+                const topic = topics?.[index];
+                if (!topic) return;
+
+                if (!topicStats[topic]) {
+                    topicStats[topic] = { total_questions: 0, wrong_answers: 0 };
+                }
+
+                topicStats[topic].total_questions += 1;
+                if (ans !== correct_answers[index]) {
+                    topicStats[topic].wrong_answers += 1;
+                }
+            });
+
+            const topicRows = Object.entries(topicStats).map(([topic, stats]) => ({
+                user_id: userId,
+                topic,
+                score: Math.round(((stats.total_questions - stats.wrong_answers) / stats.total_questions) * 100),
+                total_questions: stats.total_questions,
+                wrong_answers: stats.wrong_answers,
+                accuracy: Math.round(((stats.total_questions - stats.wrong_answers) / stats.total_questions) * 100),
+            }));
+
+            if (topicRows.length) {
+                const { error: topicError } = await db.from('test_results').insert(topicRows);
+                if (topicError) {
+                    console.error('Error saving per-topic test results:', topicError.message || topicError);
+                }
+            }
+
             await cognitiveService.updateCognitiveProfile(
                 userId,
                 score,

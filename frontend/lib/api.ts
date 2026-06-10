@@ -163,6 +163,9 @@ export async function saveTopicProgress(subject: string, topic: string, complete
   if (!response.ok) {
     throw new Error('Failed to save topic progress');
   }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("cognivex:ml-refetch"));
+  }
   return response.json();
 }
 
@@ -175,6 +178,39 @@ export async function getRoadmapProgress() {
   if (!response.ok) {
     throw new Error('Failed to fetch roadmap progress');
   }
+  return response.json();
+}
+
+export interface MLRecommendedTopic {
+  topic: string;
+  subject: string;
+  weakness_score: number;
+  reason: string;
+  priority: "high" | "medium" | "low";
+}
+
+export interface MLProfile {
+  recommended_topics: MLRecommendedTopic[];
+  strongest_subject: string | null;
+  weakest_subject: string | null;
+  difficulty_level: string;
+  learning_velocity: string;
+  daily_goal: number;
+  insight_message: string;
+  cached?: boolean;
+}
+
+export async function getMLProfile(userId: string): Promise<MLProfile> {
+  const response = await fetch(`${BASE_URL}/ml/profile/${userId}`, {
+    method: "GET",
+    headers: await getAuthHeaders(),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch ML profile");
+  }
+
   return response.json();
 }
 

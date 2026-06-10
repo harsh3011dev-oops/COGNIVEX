@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button"
 import { auth } from "@/lib/firebase"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { BASE_URL } from "@/lib/api"
+import { useMLProfile, dispatchMLRefetch } from "@/hooks/useMLProfile"
 import { BrainCircuit, Loader2 } from "lucide-react"
 
 export default function PracticePage() {
@@ -20,7 +21,13 @@ export default function PracticePage() {
   );
 }
 
+function difficultyBadgeLabel(level?: string) {
+  if (!level) return "Beginner";
+  return level.charAt(0).toUpperCase() + level.slice(1);
+}
+
 function PracticeContent() {
+  const { mlProfile } = useMLProfile()
   const [phase, setPhase] = React.useState<"setup" | "generating" | "assessment" | "results">("setup")
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0)
@@ -87,6 +94,7 @@ function PracticeContent() {
       
       const data = await response.json()
       setTestResults(data.results)
+      dispatchMLRefetch()
       setPhase("results")
     } catch (error) {
       console.error("Submission failed:", error)
@@ -116,6 +124,11 @@ function PracticeContent() {
             <p className="text-foreground/60 max-w-lg mx-auto">
               Upload any PDF study material. Cognivex AI will analyze the text and generate a targeted practice exam.
             </p>
+            {mlProfile && (
+              <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-bold">
+                <span>Current Level: {difficultyBadgeLabel(mlProfile.difficulty_level)} 🎯</span>
+              </div>
+            )}
           </div>
 
           <div className="bg-card p-8 rounded-3xl shadow-sm border border-secondary/20">
@@ -199,6 +212,13 @@ function PracticeContent() {
 
   return (
     <DashboardLayout title="Practice Assessment">
+      {mlProfile && (
+        <div className="mb-4 flex justify-center">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+            Adaptive Level: {difficultyBadgeLabel(mlProfile.difficulty_level)} 🎯
+          </span>
+        </div>
+      )}
       <div className="flex justify-between items-center mb-8 bg-card p-5 rounded-2xl border-none drop-shadow-sm shadow-inner">
         <div className="w-1/2">
           <div className="flex justify-between text-xs font-bold text-foreground/60 mb-3 uppercase tracking-wider">
