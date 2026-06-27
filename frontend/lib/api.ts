@@ -225,3 +225,162 @@ export async function saveRoadmapProgress(phase: string, item: string, completed
   }
   return response.json();
 }
+
+export interface QuestionSubject {
+  id: number;
+  name: string;
+  code: string;
+  topic_count: number;
+}
+
+export interface QuizQuestion {
+  id: number | string;
+  subject_id: number;
+  topic_id: number;
+  topic_name: string | null;
+  question: string;
+  options: string[];
+  explanation: string;
+  difficulty: string;
+}
+
+export interface QuizAnswerSubmission {
+  questionId: number | string;
+  selectedAnswer: number;
+  timeTaken: number;
+}
+
+export interface QuizReviewItem {
+  questionId: number | string;
+  question: string;
+  options: string[];
+  selectedAnswer: number;
+  correctAnswer: number;
+  isCorrect: boolean;
+  explanation: string;
+  topic_name: string | null;
+  difficulty: string;
+}
+
+export interface QuizSubmitResult {
+  attemptId: string | null;
+  score: number;
+  correctCount: number;
+  total: number;
+  accuracy: number;
+  review: QuizReviewItem[];
+}
+
+export async function getQuestionSubjects(): Promise<QuestionSubject[]> {
+  const response = await fetch(`${BASE_URL}/questions/subjects`, {
+    method: "GET",
+    headers: await getAuthHeaders(),
+    cache: "no-store",
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      typeof data?.error === "string" ? data.error : "Failed to fetch subjects"
+    );
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid subjects response from server");
+  }
+
+  return data;
+}
+
+export async function getRandomQuestions(params: {
+  subject?: number;
+  count?: number;
+  difficulty?: string;
+}): Promise<{ count: number; questions: QuizQuestion[] }> {
+  const search = new URLSearchParams();
+  if (params.subject) search.set('subject', String(params.subject));
+  if (params.count) search.set('count', String(params.count));
+  if (params.difficulty && params.difficulty !== 'mixed') {
+    search.set('difficulty', params.difficulty);
+  }
+
+  const response = await fetch(`${BASE_URL}/questions/random?${search.toString()}`, {
+    method: 'GET',
+    headers: await getAuthHeaders(),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to fetch questions');
+  }
+
+  return response.json();
+}
+
+export async function submitQuiz(
+  userId: string,
+  answers: QuizAnswerSubmission[]
+): Promise<QuizSubmitResult> {
+  const payload = { userId, answers };
+
+  const response = await fetch(`${BASE_URL}/questions/quiz/submit`, {
+    method: "POST",
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      typeof data?.error === "string"
+        ? data.details
+          ? `${data.error}: ${data.details}`
+          : data.error
+        : "Failed to submit quiz"
+    );
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("cognivex:ml-refetch"));
+  }
+
+  return data as QuizSubmitResult;
+}
+
+export async function generateQuizFromPdf(
+  file: File,
+  options?: { questionCount?: number; subject?: string }
+): Promise<{ success: boolean; questions: QuizQuestion[]; quizId?: string; metadata?: Record<string, unknown> }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (options?.questionCount) {
+    formData.append('questionCount', String(options.questionCount));
+  }
+  if (options?.subject) {
+    formData.append('subject', options.subject);
+  }
+
+  const authUser = auth.currentUser;
+  const headers: Record<string, string> = {};
+  if (authUser) {
+    headers['user-id'] = authUser.uid;
+    const token = await authUser.getIdToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${BASE_URL}/practice/generate-from-pdf`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Failed to generate quiz from PDF');
+  }
+
+  return data;
+}

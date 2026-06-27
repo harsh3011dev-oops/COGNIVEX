@@ -11,6 +11,7 @@ const aiRoutes = require('./routes/ai.routes');
 const dailyRoutes = require('./routes/dailyRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const mlRoutes = require('./routes/mlRoutes');
+const questionRoutes = require('./routes/questionRoutes');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/ai-tutor', aiRoutes);
 app.use('/daily', dailyRoutes);
 app.use('/progress', progressRoutes);
 app.use('/ml', mlRoutes);
+app.use('/questions', questionRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

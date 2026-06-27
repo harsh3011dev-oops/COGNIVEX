@@ -4,11 +4,47 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 /**
- * Send a prompt to Groq API and return the text response.
- * @param {string} prompt - The full prompt string to send.
- * @returns {Promise<string>} - The AI-generated response text.
+ * Send a prompt to Groq and return parsed JSON from the response.
+ * @param {string} prompt
+ * @param {{ temperature?: number, max_tokens?: number }} [options]
+ * @returns {Promise<object>}
  */
-async function generateAIResponse(prompt) {
+async function generateStructuredAIResponse(prompt, options = {}) {
+    const text = await generateAIResponse(prompt, {
+        temperature: options.temperature ?? 0.3,
+        max_tokens: options.max_tokens ?? 4096,
+    });
+
+    return parseJsonFromModelText(text);
+}
+
+function parseJsonFromModelText(text) {
+    if (!text || typeof text !== 'string') {
+        throw new Error('Empty AI response.');
+    }
+
+    const trimmed = text.trim();
+    const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    const candidate = fenceMatch ? fenceMatch[1].trim() : trimmed;
+
+    try {
+        return JSON.parse(candidate);
+    } catch (error) {
+        const start = candidate.indexOf('{');
+        const end = candidate.lastIndexOf('}');
+        if (start !== -1 && end !== -1 && end > start) {
+            return JSON.parse(candidate.slice(start, end + 1));
+        }
+        throw new Error('AI response was not valid JSON.');
+    }
+}
+
+/**
+ * @param {string} prompt
+ * @param {{ temperature?: number, max_tokens?: number }} [options]
+ * @returns {Promise<string>}
+ */
+async function generateAIResponse(prompt, options = {}) {
     if (!GROQ_API_KEY) {
         throw new Error('GROQ_API_KEY is not set in environment variables.');
     }
@@ -21,8 +57,8 @@ async function generateAIResponse(prompt) {
                 content: prompt
             }
         ],
-        temperature: 0.7,
-        max_tokens: 1024,
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.max_tokens ?? 1024,
         top_p: 1
     };
 
@@ -51,4 +87,4 @@ async function generateAIResponse(prompt) {
     return text;
 }
 
-module.exports = { generateAIResponse };
+module.exports = { generateAIResponse, generateStructuredAIResponse, parseJsonFromModelText };
