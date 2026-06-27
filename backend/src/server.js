@@ -21,7 +21,8 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     "http://localhost:3000",
-    "https://magenta-conkies-315dd7.netlify.app"
+    "https://cognivex-jvjeo2592-harsh3011dev-oops-projects.vercel.app",
+    /\.vercel\.app$/
   ]
 }));
 app.use(express.json());
