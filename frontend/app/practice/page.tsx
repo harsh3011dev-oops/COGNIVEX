@@ -198,7 +198,7 @@ function PracticeContent() {
         const map = pdfCorrectMapRef.current
         const review = quizQuestions.map((q, idx) => {
           const ans = finalAnswers[idx]
-          const correctAnswer = map[q.id] ?? 0
+          const correctAnswer = map[q.id as number] ?? 0
           const isCorrect = ans?.selectedAnswer === correctAnswer
           if (isCorrect) correctCount += 1
           return {
