@@ -350,10 +350,19 @@ export async function submitQuiz(
   return data as QuizSubmitResult;
 }
 
+// Raw question format returned by the PDF quiz generation endpoint
+export interface PdfQuizRawQuestion {
+  question: string;
+  options: string[];
+  correct: number; // index of the correct option (0-based)
+  topic?: string;
+  explanation?: string;
+}
+
 export async function generateQuizFromPdf(
   file: File,
   options?: { questionCount?: number; subject?: string }
-): Promise<{ success: boolean; questions: QuizQuestion[]; quizId?: string; metadata?: Record<string, unknown> }> {
+): Promise<{ success: boolean; questions: PdfQuizRawQuestion[]; quizId?: string; metadata?: Record<string, unknown> }> {
   const formData = new FormData();
   formData.append('file', file);
   if (options?.questionCount) {
@@ -367,17 +376,21 @@ export async function generateQuizFromPdf(
   const headers: Record<string, string> = {};
   if (authUser) {
     headers['user-id'] = authUser.uid;
-    const token = await authUser.getIdToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await authUser.getIdToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+    } catch (tokenErr) {
+      console.warn('generateQuizFromPdf: failed to get ID token', tokenErr);
+    }
   }
 
   const response = await fetch(`${BASE_URL}/practice/generate-from-pdf`, {
     method: 'POST',
-    headers,
+    headers, // no Content-Type — browser sets multipart boundary automatically
     body: formData,
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.success) {
     throw new Error(data.error || 'Failed to generate quiz from PDF');
   }

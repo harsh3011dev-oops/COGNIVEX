@@ -132,6 +132,9 @@ function PracticeContent() {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
   const [pdfLoading, setPdfLoading] = React.useState(false)
   const [pdfError, setPdfError] = React.useState<string | null>(null)
+  const [pdfQuestionCount, setPdfQuestionCount] = React.useState<number>(5)
+  const [pdfSubjectId, setPdfSubjectId] = React.useState<string>("")
+  const [pdfStatus, setPdfStatus] = React.useState<"idle" | "uploading" | "generating" | "error">("idle")
 
   React.useEffect(() => {
     if (!currentUser) {
@@ -146,6 +149,7 @@ function PracticeContent() {
         setSubjects(data)
         if (data.length > 0) {
           setSelectedSubjectId(String(data[0].id))
+          setPdfSubjectId(String(data[0].id))
         }
       } catch (err) {
         setSubjects([])
@@ -303,13 +307,17 @@ function PracticeContent() {
     if (!selectedFile) return
 
     setPdfError(null)
-    setPdfLoading(true)
+    setPdfStatus("uploading")
     setPhase("loading")
 
     try {
-      const subjectName = subjects.find((s) => String(s.id) === selectedSubjectId)?.name
+      // Simulate file upload transition visually
+      await new Promise((resolve) => setTimeout(resolve, 1200))
+      setPdfStatus("generating")
+
+      const subjectName = subjects.find((s) => String(s.id) === pdfSubjectId)?.name || "General"
       const data = await generateQuizFromPdf(selectedFile, {
-        questionCount,
+        questionCount: pdfQuestionCount,
         subject: subjectName,
       })
 
@@ -319,7 +327,7 @@ function PracticeContent() {
         correctMap[id] = q.correct
         return {
           id,
-          subject_id: parseInt(selectedSubjectId, 10),
+          subject_id: parseInt(pdfSubjectId, 10) || 0,
           topic_id: 0,
           topic_name: q.topic || "From PDF",
           question: q.question,
@@ -341,12 +349,12 @@ function PracticeContent() {
       answersRef.current = []
       questionStartRef.current = Date.now()
       isAdvancingRef.current = false
+      setPdfStatus("idle")
       setPhase("quiz")
     } catch (err) {
+      setPdfStatus("error")
       setPdfError(err instanceof Error ? err.message : "PDF quiz generation failed")
       setPhase("setup")
-    } finally {
-      setPdfLoading(false)
     }
   }
 
@@ -406,7 +414,13 @@ function PracticeContent() {
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <p className="text-sm text-foreground/60">
-            {pdfLoading ? "Generating quiz from PDF..." : isSubmitting ? "Submitting your answers..." : "Loading questions..."}
+            {pdfStatus === "uploading"
+              ? "Uploading PDF..."
+              : pdfStatus === "generating"
+              ? "AI is generating questions..."
+              : isSubmitting
+              ? "Submitting your answers..."
+              : "Loading questions..."}
           </p>
         </div>
       </DashboardLayout>
@@ -723,20 +737,74 @@ function PracticeContent() {
 
           {showPdfSection && (
             <div className="mt-5 pt-5 border-t border-secondary/30 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground/80">Subject Tag</label>
+                  {subjectsLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-foreground/50 h-11">
+                      <Loader2 size={14} className="animate-spin" /> Loading...
+                    </div>
+                  ) : (
+                    <select
+                      value={pdfSubjectId}
+                      onChange={(e) => setPdfSubjectId(e.target.value)}
+                      className="w-full h-11 rounded-xl border border-input/50 bg-secondary/10 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      {subjects.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground/80">Questions Count</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[5, 10, 15].map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        onClick={() => setPdfQuestionCount(count)}
+                        className={cn(
+                          "h-11 rounded-xl border text-sm font-semibold transition-all",
+                          pdfQuestionCount === count
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-secondary/40 hover:bg-secondary/20 bg-card"
+                        )}
+                      >
+                        {count} Questions
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <PdfUploader onFileSelect={setSelectedFile} />
+              
               {pdfError && (
-                <p className="text-sm text-destructive">{pdfError}</p>
+                <div className="flex items-start gap-2 rounded-xl bg-destructive/10 text-destructive p-3 text-sm">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>{pdfError}</span>
+                </div>
               )}
+              
               <Button
                 variant="outline"
                 onClick={startPdfQuiz}
-                disabled={!selectedFile || pdfLoading}
+                disabled={!selectedFile || pdfStatus !== "idle"}
                 className="w-full h-11"
               >
-                {pdfLoading ? (
+                {pdfStatus === "uploading" ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
+                    Uploading PDF...
+                  </>
+                ) : pdfStatus === "generating" ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    AI is generating questions...
                   </>
                 ) : (
                   <>
