@@ -4,6 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, Compass, Map, Dumbbell, BookOpen, ClipboardList, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/AuthContext"
+import { useEffect, useState } from "react"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -41,6 +43,23 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const { currentUser } = useAuth()
+  const [userName, setUserName] = useState("Developer Account")
+
+  useEffect(() => {
+    const stored = localStorage.getItem("cognivex_user_name")
+    if (stored) {
+      setUserName(stored)
+    } else if (currentUser?.displayName) {
+      setUserName(currentUser.displayName)
+    } else if (currentUser?.email) {
+      setUserName(currentUser.email.split("@")[0])
+    }
+  }, [currentUser])
+
+  const initials = userName
+    ? userName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : "US"
 
   return (
     <div className="flex h-full w-full flex-col bg-[#0c0c0e] border-r border-[#1f1f23] px-4 py-6 sm:px-5 sm:py-8">
@@ -57,26 +76,26 @@ export function Sidebar({ onNavigate, onClose }: SidebarProps) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close menu"
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-800/50 hover:text-white lg:hidden border border-zinc-800/40"
+          aria-label="Close navigation sidebar"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-900 hover:text-white transition-colors lg:hidden border border-zinc-800"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
       </div>
       
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 space-y-1.5" aria-label="Sidebar navigation">
         {navigation.map((item) => {
-          const isActive = pathname?.startsWith(item.href)
+          const isActive = pathname === item.href
           return (
             <Link
               key={item.name}
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "group flex min-h-11 items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 border",
-                isActive 
-                  ? "bg-gradient-to-r from-blue-500/10 to-purple-500/5 text-white border-blue-500/20 shadow-sm" 
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 border-transparent"
+                "group flex items-center px-4 py-3 text-xs font-bold tracking-tight rounded-xl transition-all duration-200 border",
+                isActive
+                  ? "bg-blue-600/10 border-blue-500/20 text-blue-400 font-semibold shadow-inner"
+                  : "border-transparent text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200 hover:border-zinc-800/40"
               )}
             >
               <item.icon
@@ -94,10 +113,10 @@ export function Sidebar({ onNavigate, onClose }: SidebarProps) {
       
       <div className="mt-auto flex items-center space-x-3 rounded-2xl bg-zinc-900/30 border border-zinc-800/40 p-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-zinc-700 bg-gradient-to-br from-blue-500 to-purple-600 shadow-sm">
-          <span className="text-xs font-bold text-white">ST</span>
+          <span className="text-xs font-bold text-white">{initials}</span>
         </div>
         <div className="flex min-w-0 flex-col">
-          <span className="truncate text-xs font-bold text-zinc-200">Developer Account</span>
+          <span className="truncate text-xs font-bold text-zinc-200">{userName}</span>
           <span className="text-[10px] text-blue-400 font-mono uppercase tracking-wider font-semibold">Tier: Elite</span>
         </div>
       </div>
