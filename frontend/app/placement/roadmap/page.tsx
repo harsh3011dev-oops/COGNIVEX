@@ -136,7 +136,7 @@ function PlacementRoadmapContent() {
           </Card>
 
           {/* Visual Checklist Steps */}
-          <div className="relative ml-3 space-y-10 overflow-hidden border-l-2 border-dashed border-secondary/60 pl-8 sm:ml-4 sm:space-y-12 sm:pl-10">
+          <div className="relative ml-2 space-y-8 overflow-hidden border-l-2 border-dashed border-secondary/60 pl-6 sm:ml-3 sm:space-y-10 sm:pl-8 md:ml-4 md:space-y-12 md:pl-10">
             {roadmapPhases.map((phase, pIdx) => {
               const PhaseIcon = phase.icon;
               return (
@@ -148,8 +148,8 @@ function PlacementRoadmapContent() {
                   className="relative"
                 >
                   {/* Phase Marker Icon */}
-                  <div className={`absolute -left-[46px] top-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-background shadow-md sm:-left-[54px] sm:h-12 sm:w-12 md:-left-[62px] ${phase.color}`}>
-                    <PhaseIcon size={20} />
+                  <div className={`absolute -left-[38px] top-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-background shadow-md sm:-left-[46px] sm:h-10 sm:w-10 md:-left-[54px] md:h-12 md:w-12 ${phase.color}`}>
+                    <PhaseIcon size={18} />
                   </div>
 
                   <div className="mb-3">

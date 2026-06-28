@@ -70,8 +70,8 @@ export function OnboardingForm() {
   const prevStep = () => setStep((s) => Math.max(s - 1, 1))
 
   return (
-    <Card className="w-full max-w-lg mx-auto shadow-lg border-none mt-10 bg-card">
-      <CardContent className="p-8">
+    <Card className="w-full max-w-lg mx-auto shadow-lg border-none mt-4 sm:mt-6 md:mt-8 lg:mt-10 bg-card">
+      <CardContent className="p-6 sm:p-8">
         <div className="flex justify-between items-center mb-8">
           <span className="text-orange-600 font-semibold flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-orange-100 flex items-center justify-center text-primary text-xs font-bold">C</div>
@@ -124,7 +124,7 @@ export function OnboardingForm() {
               <h2 className="text-2xl font-bold mb-2">What is your current semester?</h2>
               <p className="text-gray-500 mb-6">Select your ongoing engineering semester.</p>
               
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 gap-2 sm:gap-3">
                 {["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"].map((sem) => (
                   <button 
                     key={sem}
@@ -194,7 +194,7 @@ export function OnboardingForm() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase">Proficiency Level</label>
-                  <div className="flex gap-2 mt-1">
+                  <div className="flex flex-col sm:flex-row gap-2 mt-1">
                     {["beginner", "intermediate", "advanced"].map((lvl) => (
                       <button
                         key={lvl}

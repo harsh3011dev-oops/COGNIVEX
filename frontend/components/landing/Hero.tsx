@@ -74,7 +74,7 @@ export default function Hero() {
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="flex flex-col sm:flex-row gap-4 mt-8"
+                  className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-xs sm:max-w-none px-4 justify-center"
                 >
                   <button
                     onClick={() => router.push("/auth")}
@@ -132,7 +132,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-xs sm:max-w-none px-4 mx-auto"
             >
               <button
                 onClick={() => router.push("/auth")}

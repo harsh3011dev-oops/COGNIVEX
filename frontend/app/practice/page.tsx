@@ -430,7 +430,7 @@ function PracticeContent() {
   if (phase === "results" && results) {
     return (
       <DashboardLayout title="Quiz Results">
-        <div className="mx-auto max-w-3xl mt-4 sm:mt-8 space-y-6">
+        <div className="mx-auto max-w-3xl xl:max-w-4xl mt-4 sm:mt-8 space-y-6">
           <div className="rounded-3xl bg-card p-6 sm:p-8 shadow-sm text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6">Quiz Complete</h2>
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -527,7 +527,7 @@ function PracticeContent() {
 
     return (
       <DashboardLayout title="Practice Quiz">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-3xl xl:max-w-4xl">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl bg-card p-4 sm:p-5 shadow-sm">
             <div className="flex-1 min-w-0">
               <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2">
@@ -613,7 +613,7 @@ function PracticeContent() {
 
   return (
     <DashboardLayout title="Practice Quiz Setup">
-      <div className="mx-auto max-w-3xl mt-4 sm:mt-8 space-y-6">
+      <div className="mx-auto max-w-3xl xl:max-w-4xl mt-4 sm:mt-8 space-y-6">
         <div className="text-center mb-2">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <BookOpen size={28} />
@@ -685,7 +685,7 @@ function PracticeContent() {
 
           <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground/80">Question Count</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[5, 10, 20].map((count) => (
                 <button
                   key={count}
@@ -761,7 +761,7 @@ function PracticeContent() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-foreground/80">Questions Count</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {[5, 10, 15].map((count) => (
                       <button
                         key={count}

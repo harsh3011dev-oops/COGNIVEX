@@ -164,7 +164,7 @@ function DashboardContent() {
       </div>
 
       {/* NEW: Key Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 sm:p-5">
             <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Questions Attempted</div>
@@ -198,7 +198,7 @@ function DashboardContent() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
         
         <StatsCard data={dashboardData} />
 
@@ -300,7 +300,7 @@ function DashboardContent() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
         <Card className="shadow-sm border-none bg-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -407,7 +407,7 @@ function DashboardContent() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
         <ProgressChart weeklyData={dashboardData?.weekly_activity} />
         
         {/* NEW: Subject Accuracy Breakdown */}

@@ -47,7 +47,7 @@ export default function AuthPage() {
       </nav>
 
       {/* Split Screen Layout */}
-      <div className="pt-20 grid lg:grid-cols-2 min-h-[calc(100vh-80px)]">
+      <div className="pt-20 grid lg:grid-cols-2 min-h-[calc(100dvh-80px)]">
         {/* Left Side - Branding */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}

@@ -191,7 +191,7 @@ export function ChatBox({
 
   return (
     <div 
-      className={`relative flex h-[calc(100dvh-7.5rem)] min-h-[420px] flex-col overflow-hidden rounded-2xl border-none shadow-inner drop-shadow-sm transition-colors duration-300 sm:h-[calc(100vh-140px)] sm:rounded-3xl ${isDragging ? 'bg-primary/5 ring-4 ring-primary/20' : 'bg-secondary/10'}`}
+      className={`relative flex h-[calc(100dvh-7.5rem)] min-h-[420px] flex-col overflow-hidden rounded-2xl border-none shadow-inner drop-shadow-sm transition-colors duration-300 sm:h-[calc(100dvh-140px)] sm:rounded-3xl ${isDragging ? 'bg-primary/5 ring-4 ring-primary/20' : 'bg-secondary/10'}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
