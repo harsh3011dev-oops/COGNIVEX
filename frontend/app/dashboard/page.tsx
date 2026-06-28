@@ -7,7 +7,7 @@ import { WeakAreas } from "@/components/dashboard/WeakAreas"
 import { ProgressChart } from "@/components/dashboard/ProgressChart"
 import Link from "next/link"
 import { Play, MessageCircle, Map, Flame, Check, Sparkles, BookOpenCheck, Target, Brain, TrendingUp } from "lucide-react"
-import { getDashboard, getTopicProgress, getRoadmapProgress } from "@/lib/api"
+import { getDashboard, getTopicProgress, getRoadmapProgress, type SubjectAccuracy, type RecentTest } from "@/lib/api"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -59,12 +59,12 @@ function DashboardContent() {
       try {
         const data = await getDashboard();
         setDashboardData(data);
-        setLocalStreak(data?.streak || 0);
+        setLocalStreak(Number(localStorage.getItem("streak") || 0));
       } catch (error) {
         console.error("Failed to fetch dashboard data, using local storage fallback:", error);
         const onboardingSaved = localStorage.getItem("cognivex_onboarding");
         const onboarding = onboardingSaved ? JSON.parse(onboardingSaved) : null;
-        
+
         setDashboardData({
           score: 72,
           speed: 84,
@@ -88,7 +88,7 @@ function DashboardContent() {
           recent_tests: [],
           weekly_activity: []
         });
-        setLocalStreak(3);
+        setLocalStreak(Number(localStorage.getItem("streak") || 0));
       }
 
       try {
@@ -420,7 +420,7 @@ function DashboardContent() {
           </CardHeader>
           <CardContent className="p-6 pt-2 space-y-3">
             {dashboardData?.subject_accuracy_breakdown && dashboardData.subject_accuracy_breakdown.length > 0 ? (
-              dashboardData.subject_accuracy_breakdown.map((subject) => (
+              dashboardData.subject_accuracy_breakdown.map((subject: SubjectAccuracy) => (
                 <div key={subject.subject}>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold text-foreground">{subject.subject}</span>
@@ -449,7 +449,7 @@ function DashboardContent() {
           <CardContent className="p-6 pt-2">
             {dashboardData?.recent_tests && dashboardData.recent_tests.length > 0 ? (
               <div className="space-y-3">
-                {dashboardData.recent_tests.map((test, idx) => (
+                {dashboardData.recent_tests.map((test: RecentTest, idx: number) => (
                   <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
                     <div>
                       <div className="text-sm font-semibold text-foreground">{test.subject}</div>
