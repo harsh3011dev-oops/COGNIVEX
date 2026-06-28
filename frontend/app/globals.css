@@ -1,22 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #fdfbf7; /* Very light warm beige */
-  --color-foreground: #0f172a; /* Deep navy text */
+  --color-background: #09090b; /* Zinc 950 */
+  --color-foreground: #fafafa; /* Zinc 50 */
   
-  --color-primary: #1e3a8a; /* Navy Blue */
+  --color-primary: #3b82f6; /* Electric Blue */
   --color-primary-foreground: #ffffff;
   
-  --color-secondary: #e8d5b5; /* Mustard Beige */
-  --color-secondary-foreground: #0f172a; /* Navy */
+  --color-secondary: #18181b; /* Zinc 900 */
+  --color-secondary-foreground: #a1a1aa; /* Zinc 400 */
 
-  --color-accent: #a3b18a; /* Light Green / Sage */
+  --color-accent: #a855f7; /* Purple Accent */
   --color-accent-foreground: #ffffff;
 
-  --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
+  --color-card: #18181b; /* Zinc 900 */
+  --color-card-foreground: #f4f4f5; /* Zinc 100 */
   
-  --color-input: #cbd5e1; /* Soft gray/blue border */
+  --color-input: #27272a; /* Zinc 800 */
+  
+  --color-border: #27272a;
+  --color-muted: #71717a;
+  --color-muted-foreground: #a1a1aa;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -28,12 +32,63 @@
   html {
     overflow-x: hidden;
     max-width: 100%;
+    scroll-behavior: smooth;
+    background-color: #09090b;
   }
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: #09090b;
+    color: #fafafa;
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     overflow-x: hidden;
     max-width: 100%;
   }
+
+  /* Sleek developer scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #09090b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
+  }
+}
+
+/* Glassmorphism panel styling */
+.glass-panel {
+  background: rgba(9, 9, 11, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(24, 24, 27, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Futuristic background grid */
+.grid-bg {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Cyber glows */
+.glow-blue {
+  box-shadow: 0 0 50px -10px rgba(59, 130, 246, 0.15);
+}
+
+.glow-purple {
+  box-shadow: 0 0 50px -10px rgba(168, 85, 247, 0.15);
+}
+
+/* Custom terminal font stack if system has it */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

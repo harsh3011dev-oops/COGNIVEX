@@ -6,7 +6,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard"
 import { WeakAreas } from "@/components/dashboard/WeakAreas"
 import { ProgressChart } from "@/components/dashboard/ProgressChart"
 import Link from "next/link"
-import { Play, MessageCircle, Map, Flame, Check, Sparkles, BookOpenCheck, Target, Brain, TrendingUp } from "lucide-react"
+import { Play, MessageCircle, Map, Flame, Check, Sparkles, BookOpenCheck, Target, Brain, TrendingUp, Trophy, ArrowRight, Lightbulb } from "lucide-react"
 import { getDashboard, getTopicProgress, getRoadmapProgress, type SubjectAccuracy, type RecentTest } from "@/lib/api"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { ProgressBar } from "@/components/ui/ProgressBar"
@@ -23,9 +23,9 @@ export default function DashboardPage() {
 }
 
 function priorityColor(priority: string) {
-  if (priority === "high") return "bg-red-500";
-  if (priority === "medium") return "bg-amber-500";
-  return "bg-green-500";
+  if (priority === "high") return "bg-red-500/20 text-red-400 border border-red-500/30";
+  if (priority === "medium") return "bg-amber-500/20 text-amber-400 border border-amber-500/30";
+  return "bg-green-500/20 text-green-400 border border-green-500/30";
 }
 
 function velocityLabel(velocity: string) {
@@ -33,6 +33,12 @@ function velocityLabel(velocity: string) {
   if (velocity === "needs_attention") return "Needs Attention ⚠️";
   return "Stable ➡️";
 }
+
+const mockBadges = [
+  { name: "First Milestone", desc: "Completed 1st practice test", color: "from-blue-500/10 to-indigo-500/10 text-blue-400 border-blue-500/20" },
+  { name: "Code Committer", desc: "Logged 3 day learning streak", color: "from-purple-500/10 to-pink-500/10 text-purple-400 border-purple-500/20" },
+  { name: "DSA Initiate", desc: "First roadmap checkpoint cleared", color: "from-orange-500/10 to-amber-500/10 text-orange-400 border-orange-500/20" }
+];
 
 function DashboardContent() {
   const [dashboardData, setDashboardData] = React.useState<any>(null);
@@ -149,190 +155,184 @@ function DashboardContent() {
   return (
     <DashboardLayout title="Dashboard">
       
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 p-4 text-white shadow-md sm:mb-8 sm:rounded-3xl sm:p-6 md:flex-row md:items-center">
-        <div className="min-w-0">
-          <span className="inline-block max-w-full truncate rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider sm:text-xs">
+      {/* Welcome Hero Panel */}
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 rounded-2xl border border-zinc-800 bg-[#0c0c0e] p-4 text-white shadow-xl sm:mb-8 sm:rounded-2xl sm:p-6 md:flex-row md:items-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="min-w-0 z-10">
+          <span className="inline-block max-w-full truncate rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400">
             {dashboardData?.semester} Semester • Goal: {goal}
           </span>
-          <h2 className="mt-2 mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">Sanctuary of Learning</h2>
-          <p className="text-xs opacity-90 sm:text-sm">Exactly what you need to master for exams and placement screening.</p>
+          <h2 className="mt-2 mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl text-white">Learning Workspace</h2>
+          <p className="text-xs text-zinc-400 font-semibold sm:text-sm">Ecosystem sync active. Access your customized roadmap options below.</p>
         </div>
-        <div className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 backdrop-blur-sm sm:w-auto sm:justify-start">
-          <Flame size={20} className="fill-white animate-pulse" />
-          <span className="font-bold text-sm">{localStreak} Day Streak</span>
+        <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2.5 backdrop-blur-sm sm:w-auto sm:justify-start shrink-0 z-10">
+          <Flame size={18} className="fill-orange-500 text-orange-500 animate-pulse" />
+          <span className="font-bold text-xs font-mono text-blue-400">{localStreak} Day Streak</span>
         </div>
       </div>
 
-      {/* NEW: Key Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 sm:p-5">
-            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Questions Attempted</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.total_questions_attempted || 0}</div>
-            <div className="text-[10px] text-foreground/40">Total practice questions</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 sm:p-5">
-            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Overall Accuracy</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.overall_accuracy_percent || 0}%</div>
-            <div className="text-[10px] text-foreground/40">Across all tests</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 sm:p-5">
-            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Tests Taken</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.total_tests || 0}</div>
-            <div className="text-[10px] text-foreground/40">Practice assessments</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 sm:p-5">
-            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Topics Completed</div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.topics_completed_count || 0}</div>
-            <div className="text-[10px] text-foreground/40">Marked complete</div>
-          </CardContent>
-        </Card>
+      {/* Grid: Key Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[
+          { title: "Questions Attempted", value: dashboardData?.total_questions_attempted || 0, desc: "Total practice attempts" },
+          { title: "Overall Accuracy", value: `${dashboardData?.overall_accuracy_percent || 0}%`, desc: "Correct answers ratio" },
+          { title: "Tests Conducted", value: dashboardData?.total_tests || 0, desc: "Simulated assessments" },
+          { title: "Topics Completed", value: dashboardData?.topics_completed_count || 0, desc: "Marked syllabus items" }
+        ].map((item, idx) => (
+          <Card key={idx} className="border border-zinc-800 bg-[#0c0c0e] hover:border-zinc-700 transition-colors">
+            <CardContent className="p-4 sm:p-5">
+              <div className="text-[10px] font-bold uppercase text-zinc-500 tracking-wider mb-2 font-mono">{item.title}</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white mb-1 font-mono tracking-tight">{item.value}</div>
+              <div className="text-[10px] text-zinc-400 font-semibold">{item.desc}</div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+      {/* Main Grid Components */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         
+        {/* Intelligence stats */}
         <StatsCard data={dashboardData} />
 
-        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
+        {/* Target Progress Card */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <BookOpenCheck size={16} className="text-primary" />
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <BookOpenCheck size={14} className="text-blue-500" />
               <span>Target Progress</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-2 flex flex-col justify-between h-[80%]">
+          <CardContent className="p-5 flex flex-col justify-between h-[80%] min-h-[220px]">
             {(goal === "Ace Semester Exams" || goal === "Both") && (
               <div className="mb-4">
-                <div className="flex justify-between items-center text-xs font-bold text-foreground/70 uppercase tracking-wider mb-2">
-                  <span>Semester Subject Completion</span>
+                <div className="flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2 font-mono">
+                  <span>Semester Subject progress</span>
                   <span>{subjectCompletion}%</span>
                 </div>
-                <ProgressBar value={subjectCompletion} className="h-2.5 rounded-full" />
-                <div className="text-[10px] text-foreground/50 mt-1 font-semibold">
-                  Recommended next: <span className="text-primary">{mlProfile?.weakest_subject || dashboardData?.next_recommended_subject}</span>
+                <ProgressBar value={subjectCompletion} className="h-2 rounded-full" />
+                <div className="text-[10px] text-zinc-400 mt-2 font-semibold">
+                  Syllabus vector: <span className="text-blue-500 font-mono">{mlProfile?.weakest_subject || dashboardData?.next_recommended_subject}</span>
                 </div>
               </div>
             )}
 
             {(goal === "Crack Placements" || goal === "Both") && (
               <div>
-                <div className="flex justify-between items-center text-xs font-bold text-foreground/70 uppercase tracking-wider mb-2">
-                  <span>Placement Roadmap Items</span>
+                <div className="flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2 font-mono">
+                  <span>Placement Roadmap Milestones</span>
                   <span>{roadmapCompletion}%</span>
                 </div>
-                <ProgressBar value={roadmapCompletion} className="h-2.5 rounded-full" />
-                <div className="text-[10px] text-foreground/50 mt-1 font-semibold">
-                  Target sector: <span className="text-primary">{dashboardData?.placement_target}</span>
+                <ProgressBar value={roadmapCompletion} className="h-2 rounded-full animate-pulse" />
+                <div className="text-[10px] text-zinc-400 mt-2 font-semibold">
+                  Sector target: <span className="text-purple-400 font-mono">{dashboardData?.placement_target}</span>
                 </div>
               </div>
             )}
 
-            <div className="border-t border-secondary/40 pt-4 mt-auto flex justify-between gap-2">
-              <Link href="/exam-prep" className="text-xs font-bold text-primary hover:underline">Exam prep</Link>
-              <Link href="/placement/roadmap" className="text-xs font-bold text-primary hover:underline">Placement roadmap</Link>
+            <div className="border-t border-zinc-850 pt-4 mt-auto flex justify-between gap-2">
+              <Link href="/exam-prep" className="text-xs font-bold text-blue-500 hover:text-blue-400 flex items-center gap-1">
+                Syllabus prep <ArrowRight size={12} />
+              </Link>
+              <Link href="/placement/roadmap" className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1">
+                Roadmap <ArrowRight size={12} />
+              </Link>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
+        {/* Focus Tasks Card */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Check size={16} className="text-primary" />
-              <span>Today&apos;s Focus</span>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <Check size={14} className="text-blue-500" />
+              <span>Today&apos;s Focus Sandbox</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-2 space-y-3">
+          <CardContent className="p-5 space-y-3">
             {mlProfile?.recommended_topics?.[0] && (
-              <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 mb-2">
-                <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Primary Focus</div>
-                <div className="text-sm font-bold text-foreground">{mlProfile.recommended_topics[0].topic}</div>
-                <div className="text-[10px] text-foreground/50">{mlProfile.recommended_topics[0].subject}</div>
-                <div className="text-[10px] text-foreground/60 mt-2">
-                  Daily goal: {mlProfile.daily_goal} topics
-                </div>
+              <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 mb-2">
+                <div className="text-[9px] font-bold text-blue-400 uppercase tracking-widest font-mono mb-1">Recommended Node</div>
+                <div className="text-xs font-bold text-white">{mlProfile.recommended_topics[0].topic}</div>
+                <div className="text-[10px] text-zinc-400 font-semibold">{mlProfile.recommended_topics[0].subject}</div>
               </div>
             )}
 
             {focusTasks.length === 0 ? (
-              <p className="text-xs text-foreground/50">Complete a practice test to get personalized focus tasks.</p>
+              <p className="text-xs text-zinc-500 font-medium">Complete simulated exams to deploy AI guidance focus steps.</p>
             ) : (
-              focusTasks.map((task) => {
-                const isDone = completedTasks.includes(task);
-                return (
-                  <div 
-                    key={task}
-                    onClick={() => handleToggleTask(task)}
-                    className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors ${
-                      isDone 
-                        ? 'bg-primary/5 opacity-70' 
-                        : 'bg-secondary/40 hover:bg-secondary/70'
-                    }`}
-                  >
-                    <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${
-                      isDone ? 'bg-primary border-primary text-white' : 'bg-white border-gray-300 text-transparent'
-                    }`}>
-                      <Check size={10} strokeWidth={3} />
+              <div className="space-y-2">
+                {focusTasks.map((task) => {
+                  const isDone = completedTasks.includes(task);
+                  return (
+                    <div 
+                      key={task}
+                      onClick={() => handleToggleTask(task)}
+                      className={`flex min-h-10 cursor-pointer items-center gap-3 rounded-xl border p-2.5 transition-colors ${
+                        isDone 
+                          ? 'bg-blue-500/5 border-blue-500/20 opacity-70' 
+                          : 'bg-zinc-900/40 border-zinc-800 hover:bg-zinc-800/40 hover:border-zinc-700'
+                      }`}
+                    >
+                      <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${
+                        isDone ? 'bg-blue-500 border-blue-500 text-white' : 'bg-transparent border-zinc-700 text-transparent'
+                      }`}>
+                        <Check size={10} strokeWidth={3} />
+                      </div>
+                      <span className={`text-[11px] font-semibold ${isDone ? 'line-through text-zinc-550' : 'text-zinc-200'}`}>
+                        {task}
+                      </span>
                     </div>
-                    <span className={`text-xs font-semibold ${isDone ? 'line-through text-foreground/40' : 'text-foreground/85'}`}>
-                      {task}
-                    </span>
-                  </div>
-                )
-              })
+                  )
+                })}
+              </div>
             )}
 
             {focusTasks.length > 0 && completedTasks.length === focusTasks.length && (
-              <div className="text-[10px] font-bold text-primary uppercase tracking-wider text-center mt-2 flex items-center justify-center gap-1">
+              <div className="text-[10px] font-bold text-blue-400 uppercase tracking-widest font-mono text-center mt-2 flex items-center justify-center gap-1 animate-bounce">
                 <Sparkles size={10} />
-                <span>Focus Completed! Streak saved</span>
+                <span>Node verified! Streak status updated</span>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
-        <Card className="shadow-sm border-none bg-card">
+      {/* Grid: AI Revision & Insights */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Targeted Revision */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Target size={16} className="text-primary" />
-              <span>Targeted Revision</span>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <Target size={14} className="text-blue-500" />
+              <span>Targeted AI Revisions</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-2 space-y-4">
+          <CardContent className="p-5 space-y-4">
             {recommendedTopics.length === 0 ? (
-              <p className="text-xs text-foreground/50">No revision targets yet. Take a practice test to generate recommendations.</p>
+              <p className="text-xs text-zinc-500 font-medium">Diagnostic matrices clear. Start assessment tasks to retrieve revision loops.</p>
             ) : (
               recommendedTopics.map((item) => (
-                <div key={`${item.subject}-${item.topic}`} className="p-4 rounded-2xl bg-secondary/30">
+                <div key={`${item.subject}-${item.topic}`} className="p-4 rounded-xl bg-zinc-900/30 border border-zinc-850">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <div className="text-sm font-bold text-foreground">{item.topic}</div>
-                      <div className="text-[10px] text-foreground/50">{item.subject}</div>
+                      <div className="text-xs font-bold text-white">{item.topic}</div>
+                      <div className="text-[10px] text-zinc-400 font-semibold">{item.subject}</div>
                     </div>
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full text-white ${priorityColor(item.priority)}`}>
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded font-mono ${priorityColor(item.priority)}`}>
                       {item.priority}
                     </span>
                   </div>
                   <div className="mb-2">
-                    <div className="flex justify-between text-[10px] text-foreground/50 mb-1">
-                      <span>Weakness Score</span>
-                      <span>{item.weakness_score}</span>
+                    <div className="flex justify-between text-[9px] text-zinc-400 mb-1 font-mono">
+                      <span>Weakness Diagnostic Rating</span>
+                      <span>{item.weakness_score}/100</span>
                     </div>
-                    <ProgressBar value={Math.min(item.weakness_score, 100)} className="h-1.5" />
+                    <ProgressBar value={Math.min(item.weakness_score, 100)} className="h-1 rounded-full" />
                   </div>
-                  <p className="text-[10px] text-foreground/60 mb-3">{item.reason}</p>
+                  <p className="text-[10px] text-zinc-500 font-semibold mb-3 leading-relaxed">{item.reason}</p>
                   <Link href={`/ai-mentor?topic=${encodeURIComponent(item.topic)}&subject=${encodeURIComponent(item.subject)}`}>
-                    <Button size="sm" variant="outline" className="w-full text-xs">Study Now</Button>
+                    <Button size="sm" variant="outline" className="w-full text-[10px] h-8 rounded-lg cursor-pointer">Consult AI Advisor</Button>
                   </Link>
                 </div>
               ))
@@ -340,137 +340,173 @@ function DashboardContent() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-none bg-card">
+        {/* AI Learning Insights */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Brain size={16} className="text-primary" />
-              <span>Learning Insights</span>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <Brain size={14} className="text-blue-500" />
+              <span>AI Diagnostics & Insights</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-2 space-y-4">
+          <CardContent className="p-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-green-50 p-3 dark:bg-green-950/20">
-                <div className="text-[10px] font-bold uppercase text-foreground/50">Strongest</div>
-                <div className="break-words text-xs font-bold text-foreground sm:text-sm">{mlProfile?.strongest_subject || "—"}</div>
+              <div className="rounded-xl bg-green-500/5 border border-green-500/20 p-3">
+                <div className="text-[9px] font-bold uppercase text-green-400 font-mono mb-1">Strongest Core</div>
+                <div className="break-words text-xs font-bold text-white">{mlProfile?.strongest_subject || "—"}</div>
               </div>
-              <div className="rounded-xl bg-red-50 p-3 dark:bg-red-950/20">
-                <div className="text-[10px] font-bold uppercase text-foreground/50">Weakest</div>
-                <div className="break-words text-xs font-bold text-foreground sm:text-sm">{mlProfile?.weakest_subject || "—"}</div>
+              <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-3">
+                <div className="text-[9px] font-bold uppercase text-red-400 font-mono mb-1">Weakest Node</div>
+                <div className="break-words text-xs font-bold text-white">{mlProfile?.weakest_subject || "—"}</div>
               </div>
-              <div className="p-3 rounded-xl bg-secondary/30">
-                <div className="text-[10px] font-bold text-foreground/50 uppercase">Difficulty</div>
-                <div className="text-sm font-bold text-foreground capitalize">{mlProfile?.difficulty_level || "beginner"}</div>
+              <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/30">
+                <div className="text-[9px] font-bold text-zinc-400 uppercase font-mono mb-1">Complexity Tag</div>
+                <div className="text-xs font-bold text-white capitalize">{mlProfile?.difficulty_level || "beginner"}</div>
               </div>
-              <div className="p-3 rounded-xl bg-secondary/30">
-                <div className="text-[10px] font-bold text-foreground/50 uppercase flex items-center gap-1">
-                  <TrendingUp size={10} /> Trend
+              <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/30">
+                <div className="text-[9px] font-bold text-zinc-400 uppercase font-mono flex items-center gap-1">
+                  <TrendingUp size={10} className="text-blue-500" /> Velocity
                 </div>
-                <div className="text-sm font-bold text-foreground">{velocityLabel(mlProfile?.learning_velocity || "stable")}</div>
+                <div className="text-xs font-bold text-white">{velocityLabel(mlProfile?.learning_velocity || "stable")}</div>
               </div>
             </div>
-            <p className="text-xs text-foreground/70 leading-relaxed p-3 rounded-xl bg-primary/5 border border-primary/10">
-              {mlProfile?.insight_message}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
-        <Link href="/practice" className="group flex min-h-11 items-center gap-4 rounded-2xl border border-secondary/40 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-5">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <Play size={16} className="ml-0.5" />
-          </div>
-          <div>
-            <div className="font-bold text-sm text-foreground">Launch Mock Exam</div>
-            <div className="text-[10px] text-foreground/50">Simulate time-tracked testing</div>
-          </div>
-        </Link>
-        
-        <Link href="/ai-mentor" className="group flex min-h-11 items-center gap-4 rounded-2xl border border-secondary/40 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:p-5">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <MessageCircle size={16} />
-          </div>
-          <div>
-            <div className="font-bold text-sm text-foreground">AI Mentor Chat</div>
-            <div className="text-[10px] text-foreground/50">Ask questions and clarify topics</div>
-          </div>
-        </Link>
-        
-        <Link href="/placement/practice" className="group flex min-h-11 items-center gap-4 rounded-2xl border border-secondary/40 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:col-span-2 sm:p-5 md:col-span-1">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <Map size={16} />
-          </div>
-          <div>
-            <div className="font-bold text-sm text-foreground">Interview Practice</div>
-            <div className="text-[10px] text-foreground/50">Solve topic-wise coding tests</div>
-          </div>
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
-        <ProgressChart weeklyData={dashboardData?.weekly_activity} />
-        
-        {/* NEW: Subject Accuracy Breakdown */}
-        <Card className="shadow-sm border-none bg-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <TrendingUp size={16} className="text-primary" />
-              <span>Subject Accuracy</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 pt-2 space-y-3">
-            {dashboardData?.subject_accuracy_breakdown && dashboardData.subject_accuracy_breakdown.length > 0 ? (
-              dashboardData.subject_accuracy_breakdown.map((subject: SubjectAccuracy) => (
-                <div key={subject.subject}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-semibold text-foreground">{subject.subject}</span>
-                    <span className="text-sm font-bold text-primary">{subject.accuracy}%</span>
-                  </div>
-                  <ProgressBar value={subject.accuracy} className="h-2" />
-                  <div className="text-[10px] text-foreground/40 mt-1">{subject.tests_attempted} test{subject.tests_attempted !== 1 ? 's' : ''}</div>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-foreground/50">No test data yet. Start practicing to see subject accuracy breakdown.</p>
+            {mlProfile?.insight_message && (
+              <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 flex items-start gap-2.5">
+                <Lightbulb className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-zinc-300 leading-relaxed font-semibold">
+                  {mlProfile.insight_message}
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* NEW: Recent Tests Section */}
-      <div className="mb-8">
-        <Card className="shadow-sm border-none bg-card">
+      {/* Grid: Actions Redirects */}
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <Link href="/practice" className="group flex min-h-11 items-center gap-4 rounded-xl border border-zinc-850 bg-[#0c0c0e] hover:border-zinc-700 p-4 transition-all duration-300 shadow-sm">
+          <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <Play size={14} className="ml-0.5" />
+          </div>
+          <div>
+            <div className="font-bold text-xs text-white">Assessments Center</div>
+            <div className="text-[10px] text-zinc-400 font-semibold">Launch mock test session</div>
+          </div>
+        </Link>
+        
+        <Link href="/ai-mentor" className="group flex min-h-11 items-center gap-4 rounded-xl border border-zinc-850 bg-[#0c0c0e] hover:border-zinc-700 p-4 transition-all duration-300 shadow-sm">
+          <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+            <MessageCircle size={14} />
+          </div>
+          <div>
+            <div className="font-bold text-xs text-white">AI Mentor Console</div>
+            <div className="text-[10px] text-zinc-400 font-semibold">Query custom nodes for advice</div>
+          </div>
+        </Link>
+        
+        <Link href="/placement/practice" className="group flex min-h-11 items-center gap-4 rounded-xl border border-zinc-850 bg-[#0c0c0e] hover:border-zinc-700 p-4 transition-all duration-300 shadow-sm sm:col-span-2 md:col-span-1">
+          <div className="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+            <Trophy size={14} />
+          </div>
+          <div>
+            <div className="font-bold text-xs text-white">Company Practice sandbox</div>
+            <div className="text-[10px] text-zinc-400 font-semibold">Deploy real interview tests</div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Grid: Charts & Performance */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <ProgressChart weeklyData={dashboardData?.weekly_activity} />
+        
+        {/* Subject Accuracy Breakdown */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Play size={16} className="text-primary" />
-              <span>Recent Tests</span>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <TrendingUp size={14} className="text-blue-500" />
+              <span>Subject Accuracy Breakdowns</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-2">
+          <CardContent className="p-5 space-y-4">
+            {dashboardData?.subject_accuracy_breakdown && dashboardData.subject_accuracy_breakdown.length > 0 ? (
+              <div className="space-y-3.5">
+                {dashboardData.subject_accuracy_breakdown.map((subject: SubjectAccuracy) => (
+                  <div key={subject.subject}>
+                    <div className="flex justify-between items-center mb-1.5 text-xs font-semibold text-zinc-200">
+                      <span>{subject.subject}</span>
+                      <span className="font-mono text-blue-400">{subject.accuracy}%</span>
+                    </div>
+                    <ProgressBar value={subject.accuracy} className="h-1.5" />
+                    <div className="text-[9px] text-zinc-400 font-semibold mt-1 font-mono">{subject.tests_attempted} session{subject.tests_attempted !== 1 ? 's' : ''} logged</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500 font-semibold">Diagnostic logs clear. Complete assessments to update variables.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Grid: Recent Assessments & Achievement Badges */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Recent Tests Section */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e] lg:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <Play size={14} className="text-blue-500" />
+              <span>Recent Assessment Logs</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5">
             {dashboardData?.recent_tests && dashboardData.recent_tests.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {dashboardData.recent_tests.map((test: RecentTest, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-zinc-850 bg-zinc-900/10 hover:border-zinc-800 transition-colors">
                     <div>
-                      <div className="text-sm font-semibold text-foreground">{test.subject}</div>
-                      <div className="text-[10px] text-foreground/50">
+                      <div className="text-xs font-bold text-white">{test.subject}</div>
+                      <div className="text-[10px] text-zinc-400 font-semibold font-mono">
                         {new Date(test.created_at).toLocaleDateString()} • {new Date(test.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-foreground">
-                        {test.questions_correct}/{test.questions_attempted}
-                      </div>
-                      <div className={`text-xs font-semibold ${test.accuracy >= 75 ? 'text-green-600' : test.accuracy >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
-                        {test.accuracy}%
+                    <div className="text-right flex items-center gap-4">
+                      <div className="text-right">
+                        <div className="text-xs font-bold text-zinc-200 font-mono">
+                          {test.questions_correct}/{test.questions_attempted} Qs
+                        </div>
+                        <div className={`text-[10px] font-bold font-mono ${test.accuracy >= 75 ? 'text-green-400' : test.accuracy >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
+                          {test.accuracy}% accuracy
+                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-foreground/50">No tests attempted yet. Visit the practice section to get started!</p>
+              <p className="text-xs text-zinc-500 font-semibold">No assessment records located. Launch the practice sandbox to log details!</p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Achievement Badges Section */}
+        <Card className="border border-zinc-800 bg-[#0c0c0e]">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-mono">
+              <Trophy size={14} className="text-blue-500" />
+              <span>Unlocked Milestones</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 space-y-3">
+            {mockBadges.map((badge, idx) => (
+              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl border border-zinc-850 bg-zinc-900/10">
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center shrink-0 border border-zinc-800`}>
+                  <Trophy size={14} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">{badge.name}</h4>
+                  <p className="text-[10px] text-zinc-400 font-semibold mt-0.5 leading-relaxed">{badge.desc}</p>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>

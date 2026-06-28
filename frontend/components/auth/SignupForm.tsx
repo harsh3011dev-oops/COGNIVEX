@@ -100,7 +100,7 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
     "bg-orange-500",
     "bg-yellow-500",
     "bg-green-500",
-  ][passwordStrength - 1] || "bg-slate-700";
+  ][passwordStrength - 1] || "bg-zinc-800";
 
   const passwordStrengthLabel = ["Weak", "Fair", "Good", "Strong"][
     passwordStrength - 1
@@ -109,33 +109,33 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold mb-2">Create Account</h2>
-        <p className="text-slate-400">Join Cognivex and start learning</p>
+        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Create Account</h2>
+        <p className="text-zinc-400 text-xs mt-1">Start your active learning and assessment sandbox</p>
       </div>
 
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex gap-3 items-start"
+          className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold flex gap-2 items-start"
         >
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </motion.div>
       )}
 
-      <form onSubmit={handleSignup} className="space-y-5">
+      <form onSubmit={handleSignup} className="space-y-4">
         {/* Full Name Field */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Full Name</label>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Full Name</label>
           <div className="relative">
-            <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-800 bg-[#121214] text-xs text-white placeholder-zinc-650 outline-none transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
               required
               disabled={loading}
             />
@@ -143,16 +143,16 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
         </div>
 
         {/* Email Field */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Email</label>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Email Address</label>
           <div className="relative">
-            <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              placeholder="name@domain.com"
+              className="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-800 bg-[#121214] text-xs text-white placeholder-zinc-650 outline-none transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
               required
               disabled={loading}
             />
@@ -160,29 +160,29 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
         </div>
 
         {/* Password Field */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Password</label>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Password</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={handlePasswordChange}
               placeholder="••••••••"
-              className="w-full pl-10 pr-12 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full h-11 pl-10 pr-10 rounded-xl border border-zinc-800 bg-[#121214] text-xs text-white placeholder-zinc-650 outline-none transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
               required
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-300"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
               disabled={loading}
             >
               {showPassword ? (
-                <EyeOff className="w-5 h-5" />
+                <EyeOff className="w-4 h-4" />
               ) : (
-                <Eye className="w-5 h-5" />
+                <Eye className="w-4 h-4" />
               )}
             </button>
           </div>
@@ -192,55 +192,55 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-3 space-y-2"
+              className="mt-2 space-y-1.5"
             >
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className={`h-1.5 flex-1 rounded-full transition-colors ${
+                    className={`h-1 flex-1 rounded-full transition-colors ${
                       i <= passwordStrength
                         ? passwordStrengthColor
-                        : "bg-slate-700"
+                        : "bg-zinc-800"
                     }`}
                   />
                 ))}
               </div>
-              <p className="text-xs text-slate-400">
-                Password Strength: <span className="font-semibold text-slate-300">{passwordStrengthLabel}</span>
+              <p className="text-[10px] text-zinc-500">
+                Complexity rating: <span className="font-semibold text-zinc-300">{passwordStrengthLabel}</span>
               </p>
             </motion.div>
           )}
         </div>
 
         {/* Confirm Password Field */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Confirm Password</label>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Confirm Password</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-12 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full h-11 pl-10 pr-10 rounded-xl border border-zinc-800 bg-[#121214] text-xs text-white placeholder-zinc-650 outline-none transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
               required
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-300"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
               disabled={loading}
             >
               {showConfirmPassword ? (
-                <EyeOff className="w-5 h-5" />
+                <EyeOff className="w-4 h-4" />
               ) : (
-                <Eye className="w-5 h-5" />
+                <Eye className="w-4 h-4" />
               )}
             </button>
             {confirmPassword && password === confirmPassword && (
-              <CheckCircle2 className="absolute right-10 top-3.5 w-5 h-5 text-green-500" />
+              <CheckCircle2 className="absolute right-10 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
             )}
           </div>
         </div>
@@ -249,33 +249,33 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center gap-2"
+          className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 border border-blue-500/20 shadow-md cursor-pointer mt-6"
         >
           {loading ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Creating account...
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
+              <span>Creating Environment...</span>
             </>
           ) : (
-            "Create Account"
+            "Deploy Environment"
           )}
         </button>
       </form>
 
       {/* Divider */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-slate-700"></div>
-        <span className="text-slate-500 text-sm">Or sign up with</span>
-        <div className="flex-1 h-px bg-slate-700"></div>
+      <div className="flex items-center gap-4 py-1">
+        <div className="flex-1 h-px bg-zinc-900"></div>
+        <span className="text-zinc-500 text-[10px] uppercase font-mono tracking-widest font-bold">Or OAuth</span>
+        <div className="flex-1 h-px bg-zinc-900"></div>
       </div>
 
       {/* Google Signup */}
       <button
         onClick={handleGoogleSignup}
         disabled={loading}
-        className="w-full py-3 rounded-lg border border-slate-700 hover:border-blue-500/50 text-white font-semibold transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
+        className="w-full h-11 rounded-xl border border-zinc-800 bg-[#141416] hover:bg-zinc-800 text-xs font-bold text-zinc-200 transition-colors flex items-center justify-center gap-2.5 disabled:opacity-50 cursor-pointer"
       >
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
+        <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path
             fill="currentColor"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -293,15 +293,15 @@ export default function SignupForm({ onSwitchTab }: SignupFormProps) {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-        Continue with Google
+        <span>Sign up with Google</span>
       </button>
 
       {/* Switch to Login */}
-      <p className="text-center text-slate-400">
-        Already have an account?{" "}
+      <p className="text-center text-zinc-500 text-xs">
+        Already have credentials?{" "}
         <button
           onClick={onSwitchTab}
-          className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+          className="text-blue-400 hover:text-blue-300 font-bold transition-colors"
         >
           Login
         </button>
