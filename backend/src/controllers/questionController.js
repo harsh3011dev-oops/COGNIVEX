@@ -425,6 +425,50 @@ const submitQuiz = async (req, res) => {
             console.log('submitQuiz: quiz_attempts saved, attemptId:', attemptId);
         }
 
+        // INSERT INTO test_results — NEW: Aggregated quiz result for dashboard
+        // This creates ONE row per quiz submission (not per question)
+        try {
+            const subjectForResult = req.body?.subject || attemptRows[0]?.subject || 'Full Test';
+            
+            const testResultPayload = {
+                user_id: userId,
+                subject: subjectForResult,
+                score: score,
+                total_questions: total,
+                questions_attempted: total,
+                questions_correct: correctCount,
+                accuracy: accuracy,
+            };
+
+            console.log('Inserting into test_results:', {
+                userId,
+                subject: subjectForResult,
+                score,
+                total,
+                correctCount,
+                accuracy,
+            });
+
+            const { data: testResultData, error: testResultError } = await db
+                .from('test_results')
+                .insert([testResultPayload])
+                .select('id');
+
+            if (testResultError) {
+                console.error('test_results insert failed (non-fatal):', JSON.stringify(testResultError));
+                console.warn(
+                    'test_results insert error — dashboard may not update immediately.',
+                    'userId:', userId,
+                    'subject:', subjectForResult,
+                );
+            } else {
+                const testResultId = testResultData?.[0]?.id || null;
+                console.log('✅ test_results saved successfully, id:', testResultId);
+            }
+        } catch (testResultErr) {
+            console.error('test_results insert exception (non-fatal):', testResultErr.message || testResultErr);
+        }
+
         console.log('submitQuiz success:', { userId, total, correctCount, score });
 
         return res.status(200).json({

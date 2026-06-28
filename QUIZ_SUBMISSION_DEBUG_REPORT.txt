@@ -1,0 +1,702 @@
+================================================================================
+COGNIVEX QUIZ SUBMISSION DEBUGGING REPORT
+Issue: test_results Table Empty After Quiz Submission
+Date: 2026-06-28
+================================================================================
+
+EXECUTIVE SUMMARY
+================================================================================
+Quiz submission works correctly (200 OK response), quiz results display correctly,
+BUT the test_results table remains completely empty. Root cause: The submitQuiz 
+controller NEVER inserts into test_results—it only inserts into quiz_attempts.
+Dashboard cannot update because it queries test_results (which is empty).
+
+================================================================================
+EXECUTION FLOW TRACE
+================================================================================
+
+STEP 1: FRONTEND QUIZ SUBMISSION
+File: frontend/app/practice/page.tsx
+Line: 242
+Code:
+  const result = await submitQuiz(userId, submissionPayload)
+
+Payload Structure:
+  {
+    userId: "firebase-uid-123",
+    answers: [
+      { questionId: 1, selectedAnswer: 2, timeTaken: 15000 },
+      { questionId: 2, selectedAnswer: 1, timeTaken: 12000 },
+      ...
+    ]
+  }
+
+Status: ✅ Working correctly
+
+
+STEP 2: FRONTEND API CALL
+File: frontend/lib/api.ts
+Line: 367
+Code:
+  export async function submitQuiz(userId, answers) {
+    const response = await fetch(`${BASE_URL}/questions/quiz/submit`, {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ userId, answers }),
+    });
+    return response.json();
+  }
+
+HTTP Request:
+  POST /questions/quiz/submit
+  Headers: Authorization, Content-Type
+  Body: { userId, answers[] }
+
+Status: ✅ Working correctly (200 OK received)
+
+
+STEP 3: BACKEND ROUTE MAPPING
+File: backend/src/routes/questionRoutes.js
+Line: 13
+Code:
+  router.post('/quiz/submit', submitQuiz);
+
+Routes POST /questions/quiz/submit to submitQuiz controller
+
+Status: ✅ Route correctly mapped
+
+
+STEP 4: BACKEND CONTROLLER EXECUTION
+File: backend/src/controllers/questionController.js
+Line: 301-440
+Function: submitQuiz()
+
+What Happens:
+  a) Extract userId from auth or body
+  b) Get answers array
+  c) Fetch all questions from database
+  d) Grade each answer (compare with correct_answer)
+  e) Calculate:
+     - correctCount (number of correct answers)
+     - total (total questions)
+     - score = (correctCount / total) * 100
+     - accuracy = score
+  f) Build attemptRows array with ONE ROW PER QUESTION:
+     {
+       user_id: userId,
+       question_id: question.id,
+       subject: subjectName,
+       topic: topicName,
+       is_correct: isCorrect,
+       time_taken: timeTaken,
+       difficulty: difficulty
+     }
+  g) INSERT attemptRows into quiz_attempts table
+  h) UPDATE user ML profile if available
+  i) Return response with score, accuracy, results
+
+Response:
+  {
+    success: true,
+    score: 75,
+    correctCount: 15,
+    total: 20,
+    accuracy: 75,
+    results: [...],
+    review: [...]
+  }
+
+Status: ✅ Score calculation correct, response shows 200 OK
+
+
+CRITICAL FINDING #1: MISSING INSERT INTO test_results
+==================================================
+Lines: 407-425
+The controller inserts into `quiz_attempts` but NEVER INTO `test_results`:
+
+  Current Code:
+    const { data: savedAttempts, error: attemptError } = await db
+        .from('quiz_attempts')
+        .insert(attemptRows)
+        .select('id');
+
+  What's Missing:
+    // NO CODE LIKE THIS EXISTS:
+    // const { data: testResult, error: resultError } = await db
+    //     .from('test_results')
+    //     .insert({
+    //       user_id: userId,
+    //       score: score,
+    //       total_questions: total,
+    //       accuracy: accuracy,
+    //       created_at: new Date().toISOString()
+    //     });
+
+Result: test_results table remains EMPTY
+
+
+STEP 5: DASHBOARD DATA RETRIEVAL
+File: backend/src/controllers/dashboardController.js
+Line: 115-200
+Function: getDashboardData()
+
+What Happens:
+  a) Query user_profile table
+  b) Query topic_progress table
+  c) Query roadmap_progress table
+  d) Query test_results table <-- EXPECTS DATA HERE
+  e) Calculate aggregations from test_results:
+     - total_questions_attempted
+     - overall_accuracy_percent
+     - subject_accuracy_breakdown
+     - recent_tests
+     - weekly_activity
+
+Query:
+  const { data: testResults } = await db
+      .from('test_results')
+      .select('*')
+      .eq('user_id', userId);
+
+Result: testResults = [] (empty array)
+        All metrics show 0, [], etc.
+
+Status: ❌ Fails because test_results is empty
+
+
+STEP 6: FRONTEND DASHBOARD DISPLAY
+File: frontend/app/dashboard/page.tsx
+Lines: 1-600+
+
+What Happens:
+  a) Calls getDashboard() API
+  b) Receives response with empty arrays/zeros
+  c) Renders 4 metric cards showing: 0, 0%, 0, 0
+  d) Subject Accuracy section shows: "No test data yet"
+  e) Recent Tests section shows: "No tests attempted yet"
+  f) Weekly Activity chart shows: all zeros
+
+Status: ❌ Dashboard not updating because test_results has no data
+
+
+================================================================================
+CRITICAL FINDING #2: test_results TABLE SCHEMA INCOMPLETE
+==================================================
+
+Current Schema (backend/src/config/setup_supabase.sql, line 40-46):
+  CREATE TABLE IF NOT EXISTS test_results (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES user_profile(id) ON DELETE CASCADE,
+    score INT NOT NULL,
+    total_questions INT NOT NULL,
+    accuracy INT NOT NULL,
+    weak_areas TEXT[] DEFAULT '{}'::TEXT[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  );
+
+What's Missing (Required by Dashboard):
+  ❌ subject VARCHAR(255) -- Subject of test (DSA, OS, DBMS, etc.)
+  ❌ questions_attempted INT -- Same as total_questions
+  ❌ questions_correct INT -- Can be calculated from score
+  ❌ quiz_id UUID -- Added later in quiz_migration.sql
+  ❌ source VARCHAR(50) -- Added later in quiz_migration.sql
+
+Extended Schema (After quiz_migration.sql):
+  ✅ quiz_id UUID REFERENCES generated_quizzes(id)
+  ✅ source VARCHAR(50) DEFAULT 'manual'
+
+Still Missing:
+  ❌ subject VARCHAR(255)
+  ❌ questions_attempted INT
+
+
+================================================================================
+ROOT CAUSE ANALYSIS
+================================================================================
+
+Issue 1: No INSERT into test_results
+  - submitQuiz controller calculates score, accuracy, questions correctly
+  - BUT only inserts into quiz_attempts (one row per question)
+  - test_results table never receives any data
+  - Result: test_results is completely empty
+
+Issue 2: test_results table schema is incomplete
+  - Missing `subject` column (needed for subject accuracy breakdown)
+  - Missing `questions_attempted`/`questions_correct` (has only total_questions)
+  - Dashboard queries expect these fields
+  - Result: Even if data were inserted, calculations would be incomplete
+
+Issue 3: Dashboard queries expect fields that don't exist
+  - dashboardController expects: test.subject, test.questions_attempted, test.questions_correct
+  - test_results table has: score, total_questions, accuracy
+  - Mismatch causes undefined/null values in calculations
+
+Cascading Effect:
+  No INSERT → test_results empty
+    ↓
+  Dashboard queries return empty array
+    ↓
+  All metrics show 0/empty
+    ↓
+  Dashboard doesn't update after quiz
+
+
+================================================================================
+FILES INVOLVED IN THE PROBLEM
+================================================================================
+
+1. FRONTEND FILES:
+   ✅ frontend/app/practice/page.tsx
+      - Quiz submission works fine, calls submitQuiz API
+      - Sends correct payload
+   
+   ✅ frontend/lib/api.ts
+      - submitQuiz function works fine
+      - Correctly formats request to /questions/quiz/submit
+
+   ❌ frontend/app/dashboard/page.tsx
+      - Expects data that doesn't exist in test_results
+      - Shows 0/empty because API returns empty data
+
+2. BACKEND FILES:
+   ❌ backend/src/controllers/questionController.js (submitQuiz function)
+      - MISSING: INSERT into test_results
+      - ONLY inserts into quiz_attempts
+      - This is the PRIMARY PROBLEM
+   
+   ❌ backend/src/config/setup_supabase.sql
+      - test_results table schema incomplete
+      - Missing subject, questions_attempted, questions_correct columns
+      - This is the SECONDARY PROBLEM
+
+   ⚠️ backend/src/controllers/dashboardController.js
+      - Queries expect fields that don't exist
+      - Would need adjustment even if data were inserted
+
+3. BACKEND ROUTES:
+   ✅ backend/src/routes/questionRoutes.js
+      - Route mapping is correct
+
+
+================================================================================
+SOLUTION OPTIONS
+================================================================================
+
+OPTION A: Minimal Fix (Only insert, don't alter schema)
+  ✅ Pros: Quickest, no schema changes
+  ❌ Cons: Missing subject field, incomplete data
+
+OPTION B: Comprehensive Fix (Alter schema + insert)
+  ✅ Pros: Complete data model, proper aggregations
+  ❌ Cons: Requires schema migration
+
+OPTION C: Hybrid (Insert without subject, adjust dashboard to not need it)
+  ✅ Pros: Quick + works
+  ❌ Cons: Less useful data
+
+
+RECOMMENDED: OPTION B (Comprehensive)
+  1. Add missing columns to test_results table
+  2. Insert into test_results from submitQuiz controller
+  3. Update dashboardController queries (already done)
+
+
+================================================================================
+IMPLEMENTATION PLAN
+================================================================================
+
+PHASE 1: EXTEND test_results TABLE SCHEMA
+File: backend/src/config/migration.sql (or new file)
+
+Add Columns:
+  ALTER TABLE test_results
+    ADD COLUMN IF NOT EXISTS subject VARCHAR(255);
+  
+  ALTER TABLE test_results
+    ADD COLUMN IF NOT EXISTS questions_attempted INT DEFAULT 0;
+  
+  ALTER TABLE test_results
+    ADD COLUMN IF NOT EXISTS questions_correct INT DEFAULT 0;
+
+Why These Fields:
+  - subject: Required for subject accuracy breakdown in dashboard
+  - questions_attempted: Total questions in the quiz (same as total_questions)
+  - questions_correct: Number of correct answers (derived from score)
+
+Expected Outcome:
+  test_results table now has all fields needed
+
+
+PHASE 2: MODIFY submitQuiz CONTROLLER
+File: backend/src/controllers/questionController.js
+
+Location: After line 425 (after quiz_attempts insert)
+
+Add Code:
+  // Insert into test_results for dashboard aggregation
+  const testResultPayload = {
+    user_id: userId,
+    subject: answers[0]?.subject || 'Full Test', // Get from request or use default
+    score: score,
+    total_questions: total,
+    questions_attempted: total,
+    questions_correct: correctCount,
+    accuracy: accuracy,
+    created_at: new Date().toISOString()
+  };
+
+  const { data: testResultData, error: testResultError } = await db
+    .from('test_results')
+    .insert([testResultPayload])
+    .select('id');
+
+  if (testResultError) {
+    console.error('test_results insert failed:', JSON.stringify(testResultError));
+    // Non-fatal: continue even if test_results insert fails
+  } else {
+    console.log('test_results saved, id:', testResultData?.[0]?.id);
+  }
+
+Why This Code:
+  - Aggregates quiz data into single test_results row (not per-question)
+  - Captures subject for analytics
+  - Stores total questions and correct answers
+  - Includes accuracy for dashboard calculations
+  - Non-fatal error handling (quiz submission succeeds even if insert fails)
+
+Expected Outcome:
+  Each quiz submission creates ONE row in test_results
+  Dashboard can now query and aggregate this data
+
+
+PHASE 3: EXTRACT SUBJECT FROM REQUEST
+File: backend/src/controllers/questionController.js
+
+Current Problem:
+  answers array doesn't include subject field
+  Controller uses first question's subject (unreliable)
+
+Solution Options:
+  a) Add subject to req.body during submission
+  b) Infer from questions in the quiz
+  c) Use form field if available
+
+Recommended Implementation:
+  Accept subject in request body (optional):
+  
+  const submitQuiz = async (req, res) => {
+    const userId = req.user?.uid || req.body?.userId;
+    const { answers, subject } = req.body;  // ADD THIS
+    
+    // Later when inserting:
+    const testResultPayload = {
+      subject: subject || 'Full Test', // Use submitted subject or default
+      ...
+    };
+
+Expected Outcome:
+  Proper subject tracking in test_results
+
+
+PHASE 4: UPDATE FRONTEND API (if needed)
+File: frontend/lib/api.ts
+
+Current:
+  export async function submitQuiz(userId, answers) {
+    const response = await fetch(`${BASE_URL}/questions/quiz/submit`, {
+      body: JSON.stringify({ userId, answers }),
+    });
+  }
+
+Updated (Optional):
+  export async function submitQuiz(userId, answers, subject?) {
+    const response = await fetch(`${BASE_URL}/questions/quiz/submit`, {
+      body: JSON.stringify({ userId, answers, subject }),
+    });
+  }
+
+Expected Outcome:
+  Frontend can send subject with quiz submission
+
+
+================================================================================
+DETAILED MODIFICATIONS REQUIRED
+================================================================================
+
+MODIFICATION 1: Add Columns to test_results Table
+================================================
+File: backend/src/config/migration.sql
+
+Add these lines:
+
+  -- Extend test_results table with quiz submission details
+  ALTER TABLE test_results
+    ADD COLUMN IF NOT EXISTS subject VARCHAR(255);
+  
+  ALTER TABLE test_results
+    ADD COLUMN IF NOT EXISTS questions_attempted INT DEFAULT 0;
+  
+  ALTER TABLE test_results
+    ADD COLUMN IF NOT EXISTS questions_correct INT DEFAULT 0;
+
+
+MODIFICATION 2: Insert into test_results in submitQuiz
+================================================
+File: backend/src/controllers/questionController.js
+
+Location: After line 425 (after attemptError check, before return statement)
+
+Add this code block:
+
+  // Insert aggregated result into test_results for dashboard
+  try {
+    const testResultPayload = {
+      user_id: userId,
+      subject: req.body?.subject || 'Full Test',
+      score: score,
+      total_questions: total,
+      questions_attempted: total,
+      questions_correct: correctCount,
+      accuracy: accuracy,
+    };
+
+    const { data: testResultData, error: testResultError } = await db
+      .from('test_results')
+      .insert([testResultPayload])
+      .select('id');
+
+    if (testResultError) {
+      console.error('test_results insert error:', JSON.stringify(testResultError));
+      console.warn(
+        'test_results insert failed (non-fatal) — quiz score still returned.',
+        'subject:', testResultPayload.subject,
+        'userId:', userId
+      );
+    } else {
+      console.log('test_results saved successfully, id:', testResultData?.[0]?.id);
+    }
+  } catch (err) {
+    console.error('test_results insert exception:', err.message || err);
+    // Continue anyway
+  }
+
+
+MODIFICATION 3: Update Frontend (Optional)
+================================================
+File: frontend/lib/api.ts
+
+Change this:
+  export async function submitQuiz(
+    userId: string,
+    answers: QuizAnswerSubmission[]
+  ): Promise<QuizSubmitResult> {
+    const payload = { userId, answers };
+
+To this:
+  export async function submitQuiz(
+    userId: string,
+    answers: QuizAnswerSubmission[],
+    subject?: string
+  ): Promise<QuizSubmitResult> {
+    const payload = { userId, answers, subject };
+
+
+MODIFICATION 4: Pass Subject from Practice Page
+================================================
+File: frontend/app/practice/page.tsx
+
+Change this:
+  const result = await submitQuiz(userId, submissionPayload)
+
+To this (if subject is available):
+  const result = await submitQuiz(userId, submissionPayload, selectedSubject)
+
+
+================================================================================
+TEST VERIFICATION STEPS
+================================================================================
+
+Step 1: Apply Schema Migration
+  1. Open Supabase SQL Editor
+  2. Run the ALTER TABLE commands to add columns to test_results
+  3. Verify columns exist: SELECT * FROM test_results LIMIT 1;
+
+Step 2: Deploy Modified Controller
+  1. Replace questionController.js submitQuiz function
+  2. Restart backend server: npm run dev
+  3. Check backend logs start without errors
+
+Step 3: Submit a Quiz
+  1. Open frontend: npm run dev
+  2. Login to dashboard
+  3. Go to Practice → Launch Quiz
+  4. Answer 5+ questions
+  5. Submit quiz
+  6. Check response: Should show 200 OK with score
+
+Step 4: Verify test_results Insertion
+  1. Open Supabase SQL Editor
+  2. Run: SELECT * FROM test_results WHERE user_id = 'YOUR_USER_ID' ORDER BY created_at DESC LIMIT 5;
+  3. Expected: Should see ONE new row with:
+     - subject: (the quiz subject or "Full Test")
+     - score: (0-100)
+     - total_questions: (number of questions)
+     - questions_correct: (number correct)
+     - accuracy: (0-100)
+     - created_at: (current timestamp)
+
+Step 5: Verify Dashboard Updates
+  1. Refresh dashboard page
+  2. Check 4 metric cards:
+     - Questions Attempted: Should increment
+     - Overall Accuracy: Should show calculation
+     - Tests Taken: Should increment
+     - Topics Completed: Should show if available
+  3. Check Recent Tests section: Should show new test
+  4. Check Subject Accuracy: Should show subject breakdown
+  5. Check Weekly Activity: Should show activity spike
+
+Step 6: Check Logs for Errors
+  1. Backend console: Look for "test_results" related logs
+  2. Should see: "test_results saved successfully, id: <uuid>"
+  3. Or if failed: "test_results insert failed (non-fatal)"
+
+
+================================================================================
+EXPECTED RESULTS AFTER FIX
+================================================================================
+
+BEFORE:
+  test_results table: EMPTY (0 rows)
+  Dashboard metrics: All showing 0, empty arrays
+  User cannot see: Quiz history, subject breakdown, weekly activity
+
+AFTER:
+  test_results table: Contains one row per quiz submission
+  Dashboard metrics: Show real data
+    - Questions Attempted: 45 (cumulative)
+    - Overall Accuracy: 78.5% (average)
+    - Tests Taken: 3
+    - Topics Completed: 12
+  Dashboard sections visible:
+    - Subject Accuracy: DSA (85%), OS (72%), etc.
+    - Recent Tests: List of last 10 tests with scores
+    - Weekly Activity: Chart showing activity per day
+
+
+================================================================================
+ERROR MESSAGES TO WATCH FOR
+================================================================================
+
+Error 1: FK Constraint Violation
+  Message: "violates foreign key constraint"
+  Cause: user_id doesn't exist in user_profile
+  Fix: Ensure user exists in user_profile before submitting quiz
+
+Error 2: Column Doesn't Exist
+  Message: "column \"subject\" does not exist"
+  Cause: Migration not applied yet
+  Fix: Run ALTER TABLE commands in Supabase SQL Editor
+
+Error 3: Subject Null/Empty
+  Message: (no error, but subject = null in database)
+  Cause: req.body.subject not passed from frontend
+  Fix: Optional field works fine, defaults to 'Full Test'
+
+Error 4: RLS Violation
+  Message: "new row violates row level security policy"
+  Cause: RLS policy prevents inserts
+  Fix: Check question_bank_rls.sql has correct policies
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Issue: Quiz submits (200 OK) but test_results still empty after fix
+
+Check 1: Are columns added?
+  SELECT column_name FROM information_schema.columns WHERE table_name='test_results';
+  Should include: subject, questions_attempted, questions_correct
+
+Check 2: Is code deployed?
+  Check backend logs when submitting quiz
+  Should see: "test_results saved successfully, id: ..."
+  Or: "test_results insert error: ..."
+
+Check 3: Is insert actually executing?
+  Add console.log before insert, check backend logs
+  Add logging: console.log('Inserting into test_results:', testResultPayload)
+
+Check 4: Are there DB permission issues?
+  Check Supabase logs for insert errors
+  Verify user_id exists in user_profile
+  Verify test_results table exists and is accessible
+
+Check 5: Is the error being swallowed?
+  Check entire backend logs (not just console)
+  The error handling is non-fatal, errors are logged but submission succeeds
+
+
+================================================================================
+ROLLBACK PROCEDURE (If needed)
+================================================================================
+
+If things go wrong:
+
+1. Revert Controller Changes
+   - Restore original questionController.js
+   - Remove the test_results insert code
+   - Restart backend
+
+2. Revert Schema Changes
+   Drop the new columns (careful!):
+   
+   ALTER TABLE test_results
+     DROP COLUMN IF EXISTS subject;
+   
+   ALTER TABLE test_results
+     DROP COLUMN IF EXISTS questions_attempted;
+   
+   ALTER TABLE test_results
+     DROP COLUMN IF EXISTS questions_correct;
+
+3. Clear Test Data (optional)
+   DELETE FROM test_results WHERE user_id = '...';
+
+4. Restart Fresh
+   Reapply changes one step at a time
+
+
+================================================================================
+SUMMARY
+================================================================================
+
+Root Cause:
+  submitQuiz controller NEVER inserts into test_results table
+  Result: test_results is completely empty
+  Effect: Dashboard shows 0s and empty arrays because it queries test_results
+
+Why Dashboard Doesn't Update:
+  1. Quiz submission works, calculates score correctly
+  2. BUT score only stored in quiz_attempts (per-question data)
+  3. test_results table (aggregated per-test data) is never populated
+  4. Dashboard queries test_results, finds nothing
+  5. Dashboard cannot display metrics
+
+Solution:
+  1. Add missing columns to test_results table (subject, questions_attempted, questions_correct)
+  2. After calculating quiz score, INSERT ONE ROW into test_results with aggregated data
+  3. Dashboard can now query test_results and display metrics
+
+Files to Modify:
+  1. backend/src/config/migration.sql - Add columns
+  2. backend/src/controllers/questionController.js - Add insert logic
+  3. frontend/lib/api.ts - Optional, pass subject parameter
+  4. frontend/app/practice/page.tsx - Optional, pass subject parameter
+
+Effort: ~30 minutes
+Risk: Low (non-fatal error handling included)
+Impact: High (dashboard now fully functional with real data)
+
+================================================================================

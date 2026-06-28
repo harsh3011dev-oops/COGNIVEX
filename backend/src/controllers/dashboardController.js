@@ -117,6 +117,10 @@ const getDashboardData = async (req, res) => {
                 .eq('user_id', userId);
 
             if (!testError && testResults && testResults.length > 0) {
+                // Calculate total tests taken
+                userData.total_tests = testResults.length;
+                console.log('Dashboard total_tests:', userData.total_tests);
+
                 // Calculate total questions attempted
                 userData.total_questions_attempted = testResults.reduce((sum, test) => 
                     sum + (test.questions_attempted || 0), 0
