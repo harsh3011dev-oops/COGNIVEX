@@ -81,7 +81,7 @@ export async function submitOnboarding(data: {
   return response.json();
 }
 
-export async function getDashboard() {
+export async function getDashboard(): Promise<DashboardData> {
   const response = await fetch(`${BASE_URL}/dashboard`, {
     method: 'GET',
     headers: await getAuthHeaders(),
@@ -179,6 +179,51 @@ export async function getRoadmapProgress() {
     throw new Error('Failed to fetch roadmap progress');
   }
   return response.json();
+}
+
+export interface SubjectAccuracy {
+  subject: string;
+  accuracy: number;
+  tests_attempted: number;
+}
+
+export interface RecentTest {
+  subject: string;
+  score: number;
+  questions_correct: number;
+  questions_attempted: number;
+  accuracy: number;
+  created_at: string;
+}
+
+export interface WeeklyActivity {
+  date: string;
+  quizzes_attempted: number;
+  avg_accuracy: number;
+}
+
+export interface DashboardData {
+  score: number;
+  speed: number;
+  accuracy: number;
+  confidence: number;
+  weak_areas: string[];
+  current_focus: string;
+  semester: string;
+  goal: string;
+  target_timeline_months: number;
+  placement_target: string;
+  subject_completion_pct: number;
+  roadmap_completion_pct: number;
+  next_recommended_subject: string;
+  last_test_score: number;
+  total_tests: number;
+  total_questions_attempted: number;
+  overall_accuracy_percent: number;
+  topics_completed_count: number;
+  subject_accuracy_breakdown: SubjectAccuracy[];
+  recent_tests: RecentTest[];
+  weekly_activity: WeeklyActivity[];
 }
 
 export interface MLRecommendedTopic {

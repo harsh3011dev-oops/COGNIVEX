@@ -79,7 +79,14 @@ function DashboardContent() {
           subject_completion_pct: 35,
           roadmap_completion_pct: 25,
           next_recommended_subject: "Operating Systems",
-          streak: 3
+          last_test_score: 80,
+          total_tests: 3,
+          total_questions_attempted: 0,
+          overall_accuracy_percent: 0,
+          topics_completed_count: 0,
+          subject_accuracy_breakdown: [],
+          recent_tests: [],
+          weekly_activity: []
         });
         setLocalStreak(3);
       }
@@ -154,6 +161,41 @@ function DashboardContent() {
           <Flame size={20} className="fill-white animate-pulse" />
           <span className="font-bold text-sm">{localStreak} Day Streak</span>
         </div>
+      </div>
+
+      {/* NEW: Key Metrics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Questions Attempted</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.total_questions_attempted || 0}</div>
+            <div className="text-[10px] text-foreground/40">Total practice questions</div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Overall Accuracy</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.overall_accuracy_percent || 0}%</div>
+            <div className="text-[10px] text-foreground/40">Across all tests</div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Tests Taken</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.total_tests || 0}</div>
+            <div className="text-[10px] text-foreground/40">Practice assessments</div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-none bg-card hover:shadow-md transition-all duration-300">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-[10px] font-bold uppercase text-foreground/50 tracking-wider mb-2">Topics Completed</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-foreground mb-1">{dashboardData?.topics_completed_count || 0}</div>
+            <div className="text-[10px] text-foreground/40">Marked complete</div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -365,8 +407,75 @@ function DashboardContent() {
         </Link>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <ProgressChart weeklyData={dashboardData?.weekly_activity} />
+        
+        {/* NEW: Subject Accuracy Breakdown */}
+        <Card className="shadow-sm border-none bg-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <TrendingUp size={16} className="text-primary" />
+              <span>Subject Accuracy</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 pt-2 space-y-3">
+            {dashboardData?.subject_accuracy_breakdown && dashboardData.subject_accuracy_breakdown.length > 0 ? (
+              dashboardData.subject_accuracy_breakdown.map((subject) => (
+                <div key={subject.subject}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-semibold text-foreground">{subject.subject}</span>
+                    <span className="text-sm font-bold text-primary">{subject.accuracy}%</span>
+                  </div>
+                  <ProgressBar value={subject.accuracy} className="h-2" />
+                  <div className="text-[10px] text-foreground/40 mt-1">{subject.tests_attempted} test{subject.tests_attempted !== 1 ? 's' : ''}</div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-foreground/50">No test data yet. Start practicing to see subject accuracy breakdown.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* NEW: Recent Tests Section */}
+      <div className="mb-8">
+        <Card className="shadow-sm border-none bg-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Play size={16} className="text-primary" />
+              <span>Recent Tests</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 pt-2">
+            {dashboardData?.recent_tests && dashboardData.recent_tests.length > 0 ? (
+              <div className="space-y-3">
+                {dashboardData.recent_tests.map((test, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                    <div>
+                      <div className="text-sm font-semibold text-foreground">{test.subject}</div>
+                      <div className="text-[10px] text-foreground/50">
+                        {new Date(test.created_at).toLocaleDateString()} • {new Date(test.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-foreground">
+                        {test.questions_correct}/{test.questions_attempted}
+                      </div>
+                      <div className={`text-xs font-semibold ${test.accuracy >= 75 ? 'text-green-600' : test.accuracy >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                        {test.accuracy}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-foreground/50">No tests attempted yet. Visit the practice section to get started!</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ProgressChart />
         <WeakAreas topics={mlProfile?.recommended_topics?.map((t) => t.topic) || dashboardData?.weak_areas} />
       </div>
     </DashboardLayout>
