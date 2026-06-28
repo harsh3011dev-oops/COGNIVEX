@@ -654,7 +654,7 @@ function PracticeContent() {
                 className="w-full h-12 rounded-xl border border-input/50 bg-secondary/10 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 {subjects.map((s) => (
-                  <option key={s.id} value={s.id}>
+                  <option key={s.id} value={s.id} className="bg-card text-foreground">
                     {s.name} ({s.topic_count} topics)
                   </option>
                 ))}
@@ -751,7 +751,7 @@ function PracticeContent() {
                       className="w-full h-11 rounded-xl border border-input/50 bg-secondary/10 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30"
                     >
                       {subjects.map((s) => (
-                        <option key={s.id} value={s.id}>
+                        <option key={s.id} value={s.id} className="bg-card text-foreground">
                           {s.name}
                         </option>
                       ))}
