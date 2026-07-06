@@ -428,6 +428,24 @@ const submitQuiz = async (req, res) => {
         // INSERT INTO test_results — NEW: Aggregated quiz result for dashboard
         // This creates ONE row per quiz submission (not per question)
         try {
+            // Ensure user profile exists to avoid Foreign Key constraint violation
+            const { data: profileExists, error: checkProfileErr } = await db
+                .from('user_profile')
+                .select('id')
+                .eq('id', userId)
+                .maybeSingle();
+
+            if (!profileExists && !checkProfileErr) {
+                console.log(`Auto-creating user profile for ${userId} during quiz submission...`);
+                await db.from('user_profile').insert([{
+                    id: userId,
+                    user_id: userId,
+                    goal: 'Both',
+                    domain: 'DSA',
+                    level: 'intermediate'
+                }]);
+            }
+
             const subjectForResult = req.body?.subject || attemptRows[0]?.subject || 'Full Test';
             
             const testResultPayload = {

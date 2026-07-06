@@ -394,6 +394,33 @@ export async function submitQuiz(
 
   return data as QuizSubmitResult;
 }
+export interface PracticeTestSubmission {
+  answers: number[];
+  correct_answers: number[];
+  time_taken: number;
+  topics: string[];
+  subject?: string;
+}
+
+export async function submitPracticeTest(payload: PracticeTestSubmission): Promise<{ success: boolean; testId: string | null; results: { score: number; accuracy: number; correctCount: number; total: number } }> {
+  const response = await fetch(`${BASE_URL}/practice/submit-test`, {
+    method: "POST",
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to submit practice test");
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("cognivex:ml-refetch"));
+  }
+
+  return data;
+}
 
 // Raw question format returned by the PDF quiz generation endpoint
 export interface PdfQuizRawQuestion {

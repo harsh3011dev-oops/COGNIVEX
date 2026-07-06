@@ -35,6 +35,7 @@ const submitOnboarding = async (req, res) => {
                 .upsert(
                     {
                         id: userId,
+                        user_id: userId,
                         goal,
                         days_left: parseInt(days_left) || (parseInt(target_timeline_months) * 30) || 180,
                         domain,

@@ -31,20 +31,20 @@ const createUserProfile = async (req, res) => {
             .insert([
                 {
                     id: uid,
-                    name: name || null,
+                    user_id: uid,
                     email: email || user.email || null,
                 },
             ]);
 
         if (error) {
             console.error('Supabase profile insert error:', error.message || error);
-            return res.status(200).json({ success: false, message: 'Failed to create user profile' });
+            return res.status(500).json({ success: false, error: 'Failed to create user profile' });
         }
 
         return res.status(201).json({ success: true });
     } catch (error) {
         console.error('Create profile error:', error);
-        return res.status(200).json({ success: false, message: 'Profile creation could not be completed' });
+        return res.status(500).json({ success: false, error: 'Profile creation could not be completed' });
     }
 };
 

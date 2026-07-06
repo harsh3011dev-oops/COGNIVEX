@@ -29,12 +29,33 @@ const submitTest = async (req, res) => {
 
         let testId = null;
         if (db) {
+            // Ensure user profile exists to avoid Foreign Key constraint violation
+            const { data: profileExists, error: checkProfileErr } = await db
+                .from('user_profile')
+                .select('id')
+                .eq('id', userId)
+                .maybeSingle();
+
+            if (!profileExists && !checkProfileErr) {
+                console.log(`Auto-creating user profile for ${userId} during test submission...`);
+                await db.from('user_profile').insert([{
+                    id: userId,
+                    user_id: userId,
+                    goal: 'Both',
+                    domain: 'DSA',
+                    level: 'intermediate'
+                }]);
+            }
+
             const { data: testResult, error: dbError } = await db
                 .from('test_results')
                 .insert([{
                     user_id: userId,
+                    subject: req.body.subject || 'PDF Quiz',
                     score: score,
                     total_questions: total,
+                    questions_attempted: total,
+                    questions_correct: correctCount,
                     accuracy: accuracy,
                     weak_areas: [...new Set(weakAreasDetected)]
                 }])

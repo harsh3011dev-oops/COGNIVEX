@@ -34,13 +34,39 @@ const getDashboardData = async (req, res) => {
         }
 
         // 1. Fetch user profile
-        const { data: profile, error: profileError } = await db
+        let profile = null;
+        let { data: fetchedProfile, error: profileError } = await db
             .from('user_profile')
             .select('*')
             .eq('id', userId)
             .maybeSingle();
+
+        if (!profileError && !fetchedProfile) {
+            console.log(`Auto-creating user profile for ${userId} during dashboard load...`);
+            const { data: createdProfile, error: createError } = await db
+                .from('user_profile')
+                .insert([{
+                    id: userId,
+                    user_id: userId,
+                    goal: 'Both',
+                    days_left: 180,
+                    domain: 'DSA',
+                    level: 'intermediate',
+                    confidence: '50'
+                }])
+                .select()
+                .maybeSingle();
             
-        if (!profileError && profile) {
+            if (createError) {
+                console.error("Error auto-creating user profile:", createError);
+            } else {
+                profile = createdProfile;
+            }
+        } else {
+            profile = fetchedProfile;
+        }
+            
+        if (profile) {
             userData = {
                 ...userData,
                 score: profile.cognitive_score || 50,

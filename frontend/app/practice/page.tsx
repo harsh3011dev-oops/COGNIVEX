@@ -10,6 +10,7 @@ import {
   getQuestionSubjects,
   getRandomQuestions,
   submitQuiz,
+  submitPracticeTest,
   generateQuizFromPdf,
   type QuestionSubject,
   type QuizQuestion,
@@ -218,8 +219,26 @@ function PracticeContent() {
           }
         })
 
+        // Also submit to backend database so it shows on the dashboard
+        let attemptId = "pdf-local"
+        try {
+          const payload = {
+            answers: finalAnswers.map(ans => ans.selectedAnswer),
+            correct_answers: quizQuestions.map((_, idx) => map[-(idx + 1)] ?? 0),
+            time_taken: finalAnswers.reduce((sum, ans) => sum + ans.timeTaken, 0),
+            topics: quizQuestions.map(q => q.topic_name || "From PDF"),
+            subject: quizQuestions[0] ? (subjects.find(s => s.id === quizQuestions[0].subject_id)?.name || "PDF Quiz") : "PDF Quiz"
+          }
+          const res = await submitPracticeTest(payload)
+          if (res.testId) {
+            attemptId = res.testId
+          }
+        } catch (submitErr) {
+          console.error("Failed to submit PDF quiz to DB:", submitErr)
+        }
+
         setResults({
-          attemptId: "pdf-local",
+          attemptId,
           score: Math.round((correctCount / quizQuestions.length) * 100),
           correctCount,
           total: quizQuestions.length,
