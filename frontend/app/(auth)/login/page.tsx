@@ -49,7 +49,15 @@ export default function LoginPage() {
       await login(email, password)
       const displayName = name.trim() || email.split("@")[0] || "Scholar"
       localStorage.setItem("cognivex_user_name", displayName)
-      router.push("/dashboard")
+
+      // Check if this user has completed onboarding.
+      // OnboardingForm sets cognivex_onboarding with { completed: true } on finish.
+      const onboardingRaw = localStorage.getItem("cognivex_onboarding")
+      const onboardingDone = onboardingRaw
+        ? (() => { try { return JSON.parse(onboardingRaw)?.completed === true } catch { return false } })()
+        : false
+
+      router.push(onboardingDone ? "/dashboard" : "/onboarding")
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "Failed to sign in"))
     } finally {

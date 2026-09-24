@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { PDFParse } = require('pdf-parse');
+const pdfParse = require('pdf-parse');
 
 const MIN_TEXT_LENGTH = 200;
 const MAX_TEXT_CHARS = parseInt(process.env.QUIZ_MAX_TEXT_CHARS, 10) || 12000;
@@ -30,7 +30,6 @@ function truncateText(text) {
     if (text.length <= MAX_TEXT_CHARS) {
         return { text, truncated: false };
     }
-
     return { text: text.slice(0, MAX_TEXT_CHARS), truncated: true };
 }
 
@@ -48,11 +47,9 @@ async function extractTextFromPdf(buffer) {
         throw new PdfExtractionError('Please upload a valid PDF file.', 'INVALID_PDF', 400);
     }
 
-    let parser;
-
     try {
-        parser = new PDFParse({ data: buffer });
-        const result = await parser.getText();
+        // pdf-parse default export: pdfParse(buffer) -> { text, numpages, ... }
+        const result = await pdfParse(buffer);
         const normalized = normalizeText(result?.text || '');
 
         if (normalized.length < MIN_TEXT_LENGTH) {
@@ -92,14 +89,6 @@ async function extractTextFromPdf(buffer) {
             'PDF_EXTRACTION_FAILED',
             422
         );
-    } finally {
-        if (parser) {
-            try {
-                await parser.destroy();
-            } catch (destroyError) {
-                console.warn('PDF parser cleanup failed:', destroyError.message || destroyError);
-            }
-        }
     }
 }
 
