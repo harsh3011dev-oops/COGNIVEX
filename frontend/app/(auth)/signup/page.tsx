@@ -23,11 +23,13 @@ export default function SignupPage() {
     setError("")
     setLoading(true)
     try {
-      await signup(name, email, password)
+      const { isNewUser } = await signup(name, email, password)
       if (name.trim()) {
         localStorage.setItem("cognivex_user_name", name.trim())
       }
-      router.push("/onboarding")
+      // isNewUser is always true for email signup, but we use the value
+      // explicitly for consistency with the Google sign-in pattern.
+      router.push(isNewUser ? "/onboarding" : "/dashboard")
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to create account"
       setError(message)

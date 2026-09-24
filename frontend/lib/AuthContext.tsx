@@ -18,7 +18,7 @@ interface AuthContextValue {
   currentUser: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<{ isNewUser: boolean }>;
   logout: () => Promise<void>;
   googleSignIn: () => Promise<{ isNewUser: boolean }>;
 }
@@ -41,15 +41,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signup = async (name: string, email: string, password: string) => {
+  const signup = async (
+    name: string,
+    email: string,
+    password: string
+  ): Promise<{ isNewUser: boolean }> => {
+    // Clear any stale onboarding data from a previous user on this device
+    // so the login redirect check doesn't wrongly send this new user to dashboard
+    localStorage.removeItem("cognivex_onboarding");
+
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     if (name.trim()) {
       await updateProfile(credential.user, { displayName: name.trim() });
     }
-    await createUserProfile({ name: name.trim(), email }, credential.user);
+
+    // backend returns 201 for brand-new profiles, 200 for already-existing
+    const { isNewUser } = await createUserProfile(
+      { name: name.trim(), email },
+      credential.user
+    );
+
+    // Email signup always creates a new Firebase user, so isNewUser is always true here.
+    // We still propagate it for consistency with googleSignIn.
+    return { isNewUser };
   };
 
   const logout = async () => {
+    // Clear all per-user localStorage keys so the next user on this
+    // device starts fresh (no stale onboarding / name data).
+    localStorage.removeItem("cognivex_onboarding");
+    localStorage.removeItem("cognivex_user_name");
     await signOut(auth);
   };
 
@@ -81,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = React.useMemo(
     () => ({ currentUser, loading, login, signup, logout, googleSignIn }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentUser, loading]
   );
 
