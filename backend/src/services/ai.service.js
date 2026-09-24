@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { generateAIResponse } = require('../config/gemini');
+const { generateAIResponse } = require('../config/groq');
 const { generateMLProfile } = require('./ml.service');
 
 /**

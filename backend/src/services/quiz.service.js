@@ -1,4 +1,4 @@
-const { generateStructuredAIResponse } = require('../config/gemini');
+const { generateStructuredAIResponse } = require('../config/groq');
 const { generateMLProfile } = require('./ml.service');
 
 const DEFAULT_QUESTION_COUNT = 5;

@@ -12,12 +12,11 @@ const updateCognitiveProfile = async (userId, score, accuracy, timeTaken, weakAr
     if (!db) return null;
 
     try {
-        // 1. Fetch current profile
-        // Since we are currently using LIMIT 1 for prototyping, we'll fetch the latest record
+        // 1. Fetch current user's profile by userId
         const { data: profile, error: fetchError } = await db
             .from('user_profile')
             .select('*')
-            .order('created_at', { ascending: false })
+            .eq('id', userId)
             .limit(1);
 
         if (fetchError || !profile || profile.length === 0) {

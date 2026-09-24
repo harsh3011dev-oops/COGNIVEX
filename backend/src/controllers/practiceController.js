@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const cognitiveService = require('../services/cognitive.service');
+const dailyService = require('../services/daily.service');
 
 const submitTest = async (req, res) => {
     try {
@@ -85,16 +86,38 @@ const submitTest = async (req, res) => {
             const topicRows = Object.entries(topicStats).map(([topic, stats]) => ({
                 user_id: userId,
                 topic,
-                score: Math.round(((stats.total_questions - stats.wrong_answers) / stats.total_questions) * 100),
-                total_questions: stats.total_questions,
-                wrong_answers: stats.wrong_answers,
+                subject: req.body.subject || 'General',
                 accuracy: Math.round(((stats.total_questions - stats.wrong_answers) / stats.total_questions) * 100),
+                attempts: stats.total_questions,
+                avg_time: 0,
+                last_practiced: new Date().toISOString(),
             }));
 
             if (topicRows.length) {
-                const { error: topicError } = await db.from('test_results').insert(topicRows);
-                if (topicError) {
-                    console.error('Error saving per-topic test results:', topicError.message || topicError);
+                // Upsert into user_learning_stats (correct table) — one row per topic
+                for (const row of topicRows) {
+                    const { data: existing } = await db
+                        .from('user_learning_stats')
+                        .select('id, attempts, accuracy')
+                        .eq('user_id', userId)
+                        .eq('topic', row.topic)
+                        .maybeSingle();
+
+                    if (existing) {
+                        // Merge with existing attempts for running average
+                        const totalAttempts = (existing.attempts || 0) + row.attempts;
+                        const mergedAccuracy = Math.round(
+                            ((existing.accuracy || 0) * (existing.attempts || 0) + row.accuracy * row.attempts) / totalAttempts
+                        );
+                        const { error: updateErr } = await db
+                            .from('user_learning_stats')
+                            .update({ accuracy: mergedAccuracy, attempts: totalAttempts, last_practiced: row.last_practiced })
+                            .eq('id', existing.id);
+                        if (updateErr) console.error('Error updating user_learning_stats:', updateErr.message || updateErr);
+                    } else {
+                        const { error: insertErr } = await db.from('user_learning_stats').insert([row]);
+                        if (insertErr) console.error('Error inserting user_learning_stats:', insertErr.message || insertErr);
+                    }
                 }
             }
 
@@ -105,6 +128,13 @@ const submitTest = async (req, res) => {
                 time_taken,
                 [...new Set(weakAreasDetected)]
             );
+
+            // Update daily streak (non-fatal)
+            try {
+                await dailyService.updateStreak(userId);
+            } catch (streakErr) {
+                console.warn('updateStreak failed (non-fatal):', streakErr.message || streakErr);
+            }
         }
 
         return res.status(200).json({

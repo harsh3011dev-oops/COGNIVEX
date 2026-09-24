@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const dailyService = require('../services/daily.service');
 
 function shuffleArray(items) {
     const arr = [...items];
@@ -488,6 +489,13 @@ const submitQuiz = async (req, res) => {
         }
 
         console.log('submitQuiz success:', { userId, total, correctCount, score });
+
+        // Update daily streak (non-fatal)
+        try {
+            await dailyService.updateStreak(userId);
+        } catch (streakErr) {
+            console.warn('updateStreak failed (non-fatal):', streakErr.message || streakErr);
+        }
 
         return res.status(200).json({
             success: true,
