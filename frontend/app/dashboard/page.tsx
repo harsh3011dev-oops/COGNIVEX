@@ -68,8 +68,13 @@ function DashboardContent() {
         setLocalStreak(Number(localStorage.getItem("streak") || 0));
       } catch (error) {
         console.error("Failed to fetch dashboard data, using local storage fallback:", error);
-        const onboardingSaved = localStorage.getItem("cognivex_onboarding");
-        const onboarding = onboardingSaved ? JSON.parse(onboardingSaved) : null;
+        let onboarding = null;
+        try {
+          const onboardingSaved = localStorage.getItem("cognivex_onboarding");
+          onboarding = onboardingSaved ? JSON.parse(onboardingSaved) : null;
+        } catch (e) {
+          console.warn("Invalid JSON in localStorage for onboarding");
+        }
 
         setDashboardData({
           score: 72,
@@ -101,16 +106,24 @@ function DashboardContent() {
         const tp = await getTopicProgress();
         setTopicProgress(tp || []);
       } catch (err) {
-        const saved = localStorage.getItem("cognivex_topic_progress");
-        if (saved) setTopicProgress(JSON.parse(saved));
+        try {
+          const saved = localStorage.getItem("cognivex_topic_progress");
+          if (saved) setTopicProgress(JSON.parse(saved));
+        } catch (e) {
+          setTopicProgress([]);
+        }
       }
 
       try {
         const rp = await getRoadmapProgress();
         setRoadmapProgress(rp || []);
       } catch (err) {
-        const saved = localStorage.getItem("cognivex_roadmap_progress");
-        if (saved) setRoadmapProgress(JSON.parse(saved));
+        try {
+          const saved = localStorage.getItem("cognivex_roadmap_progress");
+          if (saved) setRoadmapProgress(JSON.parse(saved));
+        } catch (e) {
+          setRoadmapProgress([]);
+        }
       }
 
       setLoading(false);
